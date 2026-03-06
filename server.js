@@ -100,7 +100,7 @@ const ADMIN_NAMES = new Set([
 // CÃ³digos vÃ¡lidos (tudo em MAIÃšSCULO, conforme regra)
 // - FO*: permite descriÃ§Ã£o
 // - FOJ: sem descriÃ§Ã£o
-const CODES = ["EXP", "SR", "MA", "VE", "FOJ", "FO*", "LP", "FÉRIAS", "CFP_DIA", "CFP_NOITE", "OUTROS"];
+const CODES = ["EXP", "SR", "MA", "VE", "FOJ", "FO*", "LP", "FÉRIAS", "CFP_DIA", "CFP_NOITE", "OUTROS", "SS", "EXP_SS", "FO", "PF"];
 
 // ===============================
 // APP
@@ -575,15 +575,19 @@ function buildAssignmentsAndNotesFromLancamentos(rows, validDates) {
     let code = String(r.codigo || "").trim();
     // remove espaÃ§os estranhos
     code = code.replace(/\s+/g, "");
-    // aceita variaÃ§Ãµes de FO simples e converte para FOJ (FO simples nÃ£o existe no sistema)
-    if (/^FO\.?$/i.test(code)) code = "FOJ";
+    // mantém FO simples e FOJ como códigos distintos
+    if (/^FO\.?$/i.test(code)) code = "FO";
     if (/^FOJ$/i.test(code)) code = "FOJ";
     // mantÃ©m exatamente FO* (asterisco) e demais
     if (/^FO\*$/i.test(code)) code = "FO*";
     // mantÃ©m CFP_DIA/CFP_NOITE (case)
     if (/^CFP_DIA$/i.test(code)) code = "CFP_DIA";
     if (/^CFP_NOITE$/i.test(code)) code = "CFP_NOITE";
-    // mantÃ©m FÃ‰RIAS (aceita FERIAS)
+    // mantém SS/EXP_SS/PF
+    if (/^SS$/i.test(code)) code = "SS";
+    if (/^EXP_SS$/i.test(code)) code = "EXP_SS";
+    if (/^PF$/i.test(code)) code = "PF";
+    // mantém FÉRIAS (aceita FERIAS)
     if (/^FERIAS$/i.test(code)) code = "FÉRIAS";
 
     if (!validCodes.has(code)) {

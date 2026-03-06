@@ -103,15 +103,19 @@ function ddmmyyyy_hhmm(isoOrDate) {
     const help = {
       "EXP": "expediente",
       "SR": "supervisor regional",
-      "MA": "manhã",
-      "VE": "vespertino",
-      "FOJ": "folga obrigatória (sem descrição)",
-      "FO*": "folga obrigatória (com descrição)",
+      "MA": "trabalha manhã",
+      "VE": "trabalha tarde",
+      "FOJ": "folga (sem descrição)",
+      "FO*": "folga (com descrição)",
       "LP": "licença-prêmio",
       "FÉRIAS": "férias",
       "CFP_DIA": "CFP (dia)",
       "CFP_NOITE": "CFP (noite)",
-      "OUTROS": "com descrição"
+      "OUTROS": "com descrição",
+      "SS": "superior de sobreaviso",
+      "EXP_SS": "expediente superior de sobreaviso",
+      "FO": "folga",
+      "PF": "ponto facultativo"
     };
 
     for (const c of (state.codes || [])) {
