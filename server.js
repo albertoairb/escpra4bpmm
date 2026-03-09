@@ -1201,7 +1201,7 @@ app.get("/api/pdf", pdfAuth, async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="escala_semanal.pdf"`);
 
-    const doc = new PDFDocument({ margin: 28, size: "A4", layout: "landscape" });
+    const doc = new PDFDocument({ margin: 28, size: "A4", layout: "landscape", bufferPages: true, info: { Title: fixText(SYSTEM_NAME), Author: "", Creator: "", Producer: "" } });
     doc.pipe(res);
 
     // cabeÃ§alho
@@ -1293,6 +1293,7 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
     doc.moveTo(left, top + 14).lineTo(left + colWName + colWDay * dates.length, top + 14).stroke();
 
     let y = top + 18;
+    const firstPageSignatureReserve = 170;
 
     doc.fontSize(8);
     for (const off of OFFICERS) {
@@ -1306,10 +1307,37 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
       }
 
       y += 14;
-      if (y > doc.page.height - 140) {
+      const reserve = doc.page.index === 0 ? firstPageSignatureReserve : 140;
+      if (y > doc.page.height - reserve) {
         doc.addPage({ margin: 28, size: "A4", layout: "landscape" });
         y = doc.y;
       }
+    }
+
+    // assinaturas na primeira página do PDF
+    {
+      const first = doc.bufferedPageRange ? doc.bufferedPageRange() : null;
+      if (first && first.count > 0) {
+        doc.switchToPage(0);
+      }
+
+      const sig = (st.meta && st.meta.signatures) ? st.meta.signatures : defaultSignatures();
+      const sigLeft = doc.page.margins.left + 20;
+      const sigGap = 40;
+      const sigLineW = (doc.page.width - doc.page.margins.left - doc.page.margins.right - 40 - sigGap) / 2;
+      const sigRight = sigLeft + sigLineW + sigGap;
+      const sigYLine = doc.page.height - 95;
+
+      doc.moveTo(sigLeft, sigYLine).lineTo(sigLeft + sigLineW, sigYLine).stroke();
+      doc.moveTo(sigRight, sigYLine).lineTo(sigRight + sigLineW, sigYLine).stroke();
+
+      doc.fontSize(10).text(String(sig.left_name || "").toUpperCase(), sigLeft, sigYLine + 6, { width: sigLineW, align: "center" });
+      doc.fontSize(9).text(String(sig.left_role || "").toUpperCase(), sigLeft, sigYLine + 22, { width: sigLineW, align: "center" });
+
+      doc.fontSize(10).text(String(sig.right_name || "").toUpperCase(), sigRight, sigYLine + 6, { width: sigLineW, align: "center" });
+      doc.fontSize(9).text(String(sig.right_role || "").toUpperCase(), sigRight, sigYLine + 22, { width: sigLineW, align: "center" });
+
+      doc.switchToPage(doc.bufferedPageRange().count - 1);
     }
 
     // detalhamento de descriÃ§Ãµes (OUTROS e FO*)
@@ -1412,34 +1440,6 @@ if (changeLogs && changeLogs.length) {
     }
   }
 }
-
-    // assinaturas (sempre na Ãºltima pÃ¡gina)
-// tenta colocar na pÃ¡gina atual; se nÃ£o houver espaÃ§o, cria nova pÃ¡gina mantendo o mesmo layout
-{
-  const layoutNow = doc.page.layout || "portrait";
-  const needNewPage = doc.y > doc.page.height - 140;
-  if (needNewPage) {
-    doc.addPage({ margin: 36, size: "A4", layout: layoutNow });
-  }
-}
-
-    const xLeft = doc.page.margins.left;
-    const xRight = doc.page.width / 2 + 20;
-    const lineW = (doc.page.width - doc.page.margins.left - doc.page.margins.right - 40) / 2;
-    const yLine = doc.page.height - 160;
-
-    // linhas
-    doc.moveTo(xLeft, yLine).lineTo(xLeft + lineW, yLine).stroke();
-    doc.moveTo(xRight, yLine).lineTo(xRight + lineW, yLine).stroke();
-
-    // nomes e cargos (editÃ¡veis em /assinaturas)
-    const sig = (st.meta && st.meta.signatures) ? st.meta.signatures : defaultSignatures();
-
-    doc.fontSize(10).text(String(sig.left_name || "").toUpperCase(), xLeft, yLine + 6, { width: lineW, align: "center" });
-    doc.fontSize(9).text(String(sig.left_role || "").toUpperCase(), xLeft, yLine + 22, { width: lineW, align: "center" });
-
-    doc.fontSize(10).text(String(sig.right_name || "").toUpperCase(), xRight, yLine + 6, { width: lineW, align: "center" });
-    doc.fontSize(9).text(String(sig.right_role || "").toUpperCase(), xRight, yLine + 22, { width: lineW, align: "center" });
 
     // rodapÃ© (institucional): sem "desenvolvido por" no PDF
     const footer = lastStamp
