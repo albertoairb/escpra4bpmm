@@ -214,26 +214,39 @@ function fmtDDMMYYYYHHmm(value) {
   return `${dateStr} às ${hh}h${mi}`;
 }
 
-// Semana vigente: segunda a domingo, em YYYY-MM-DD (sem usar toISOString para evitar +1 dia)
+// Semana FUTURA: o sistema sempre exibe a próxima segunda-feira até o próximo domingo.
+// Exemplo: durante 09/03 a 15/03, mostra 16/03 a 22/03.
+// Na virada de domingo 00h para segunda, passa a mostrar a semana seguinte.
 // Regra adicional: nunca retornar semana anterior a CUTOVER_WEEK_START (segunda-feira).
+// Se WEEK_START_OVERRIDE estiver definido, ele prevalece integralmente.
 
 function getWeekRangeISO() {
-  const now = new Date(); // respeita TZ no processo
+  if (WEEK_START_OVERRIDE && /^\d{4}-\d{2}-\d{2}$/.test(WEEK_START_OVERRIDE)) {
+    const [oy, om, od] = WEEK_START_OVERRIDE.split("-").map(Number);
+    const monday = new Date(oy, om - 1, od);
+    monday.setHours(0, 0, 0, 0);
+    const sunday = new Date(monday);
+    sunday.setHours(0, 0, 0, 0);
+    sunday.setDate(monday.getDate() + 6);
+    return { start: fmtYYYYMMDD(monday), end: fmtYYYYMMDD(sunday) };
+  }
 
-  // data efetiva = max(agora, CUTOVER_WEEK_START ou WEEK_START_OVERRIDE)
-  const baseStart = (WEEK_START_OVERRIDE && /^\d{4}-\d{2}-\d{2}$/.test(WEEK_START_OVERRIDE)) ? WEEK_START_OVERRIDE : CUTOVER_WEEK_START;
-  const [cy, cm, cd] = baseStart.split("-").map(Number);
+  const now = new Date(); // respeita TZ no processo
+  now.setHours(0, 0, 0, 0);
+
+  const day = now.getDay(); // 0=dom, 1=seg, ..., 6=sáb
+  const daysUntilNextMonday = day === 0 ? 1 : 8 - day;
+
+  const nextMonday = new Date(now);
+  nextMonday.setDate(now.getDate() + daysUntilNextMonday);
+  nextMonday.setHours(0, 0, 0, 0);
+
+  const [cy, cm, cd] = CUTOVER_WEEK_START.split("-").map(Number);
   const cutover = new Date(cy, cm - 1, cd);
   cutover.setHours(0, 0, 0, 0);
 
-  const effective = new Date(Math.max(now.getTime(), cutover.getTime()));
-
-  const day = effective.getDay(); // 0=dom
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-
-  const monday = new Date(effective);
+  const monday = new Date(Math.max(nextMonday.getTime(), cutover.getTime()));
   monday.setHours(0, 0, 0, 0);
-  monday.setDate(effective.getDate() + diffToMonday);
 
   const sunday = new Date(monday);
   sunday.setHours(0, 0, 0, 0);
@@ -1201,7 +1214,7 @@ app.get("/api/pdf", pdfAuth, async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="escala_semanal.pdf"`);
 
-    const doc = new PDFDocument({ margin: 28, size: "A4", layout: "landscape", bufferPages: true, info: { Title: fixText(SYSTEM_NAME), Author: "", Creator: "", Producer: "" } });
+    const doc = new PDFDocument({ margin: 28, size: "A4", layout: "landscape" });
     doc.pipe(res);
 
     // cabeÃ§alho
@@ -1293,7 +1306,6 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
     doc.moveTo(left, top + 14).lineTo(left + colWName + colWDay * dates.length, top + 14).stroke();
 
     let y = top + 18;
-    const firstPageSignatureReserve = 170;
 
     doc.fontSize(8);
     for (const off of OFFICERS) {
@@ -1307,37 +1319,29 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
       }
 
       y += 14;
-      const reserve = doc.page.index === 0 ? firstPageSignatureReserve : 140;
-      if (y > doc.page.height - reserve) {
+      if (y > doc.page.height - 140) {
         doc.addPage({ margin: 28, size: "A4", layout: "landscape" });
         y = doc.y;
       }
     }
 
-    // assinaturas na primeira página do PDF
+    // assinaturas sempre na primeira página
     {
-      const first = doc.bufferedPageRange ? doc.bufferedPageRange() : null;
-      if (first && first.count > 0) {
-        doc.switchToPage(0);
-      }
+      const xLeft = doc.page.margins.left;
+      const xRight = doc.page.width / 2 + 20;
+      const lineW = (doc.page.width - doc.page.margins.left - doc.page.margins.right - 40) / 2;
+      const yLine = doc.page.height - 100;
 
       const sig = (st.meta && st.meta.signatures) ? st.meta.signatures : defaultSignatures();
-      const sigLeft = doc.page.margins.left + 20;
-      const sigGap = 40;
-      const sigLineW = (doc.page.width - doc.page.margins.left - doc.page.margins.right - 40 - sigGap) / 2;
-      const sigRight = sigLeft + sigLineW + sigGap;
-      const sigYLine = doc.page.height - 95;
 
-      doc.moveTo(sigLeft, sigYLine).lineTo(sigLeft + sigLineW, sigYLine).stroke();
-      doc.moveTo(sigRight, sigYLine).lineTo(sigRight + sigLineW, sigYLine).stroke();
+      doc.moveTo(xLeft, yLine).lineTo(xLeft + lineW, yLine).stroke();
+      doc.moveTo(xRight, yLine).lineTo(xRight + lineW, yLine).stroke();
 
-      doc.fontSize(10).text(String(sig.left_name || "").toUpperCase(), sigLeft, sigYLine + 6, { width: sigLineW, align: "center" });
-      doc.fontSize(9).text(String(sig.left_role || "").toUpperCase(), sigLeft, sigYLine + 22, { width: sigLineW, align: "center" });
+      doc.fontSize(10).text(String(sig.left_name || "").toUpperCase(), xLeft, yLine + 6, { width: lineW, align: "center" });
+      doc.fontSize(9).text(String(sig.left_role || "").toUpperCase(), xLeft, yLine + 22, { width: lineW, align: "center" });
 
-      doc.fontSize(10).text(String(sig.right_name || "").toUpperCase(), sigRight, sigYLine + 6, { width: sigLineW, align: "center" });
-      doc.fontSize(9).text(String(sig.right_role || "").toUpperCase(), sigRight, sigYLine + 22, { width: sigLineW, align: "center" });
-
-      doc.switchToPage(doc.bufferedPageRange().count - 1);
+      doc.fontSize(10).text(String(sig.right_name || "").toUpperCase(), xRight, yLine + 6, { width: lineW, align: "center" });
+      doc.fontSize(9).text(String(sig.right_role || "").toUpperCase(), xRight, yLine + 22, { width: lineW, align: "center" });
     }
 
     // detalhamento de descriÃ§Ãµes (OUTROS e FO*)
@@ -1392,63 +1396,7 @@ doc.moveDown(0.6);
     }
 
 
-// histÃ³rico de alteraÃ§Ãµes (semana)
-if (changeLogs && changeLogs.length) {
-  doc.addPage({ margin: 36, size: "A4", layout: "portrait" });
-  doc.fontSize(14).text("HISTÃ“RICO DE ALTERAÃ‡Ã•ES (SEMANA)", { align: "center" });
-  doc.moveDown(0.6);
-  doc.fontSize(9);
-
-  // imprime somente alteraÃ§Ãµes relacionadas a OUTROS/FO* (cÃ³digo ou observaÃ§Ã£o)
-  const relevant = [];
-  for (const r of changeLogs) {
-    const iso = isoFromDbDate(r.data);
-    const canonical = resolveCanonicalFromDbOfficer(r.target_name);
-    // tenta achar cÃ³digo vigente do dia para filtrar FO*/OUTROS
-    const key = canonical ? `${canonical}|${iso}` : null;
-    const code = key && assignments[key] ? String(assignments[key]) : "";
-    if (code !== "OUTROS" && code !== "FO*") continue;
-    relevant.push(r);
-  }
-
-  if (!relevant.length) {
-    doc.font("Helvetica").text("sem alteraÃ§Ãµes relacionadas a OUTROS/FO* nesta semana.");
-  } else {
-    for (const r of relevant) {
-      const when = r.at ? fmtDDMMYYYYHHmm(r.at) : "";
-      const day = r.data ? fmtDDMMYYYY(isoFromDbDate(r.data)) : "";
-      const who = r.actor_name ? String(r.actor_name) : "";
-      const target = r.target_name ? String(r.target_name) : "";
-      const field = r.field_name ? String(r.field_name) : "";
-      const beforeV = r.before_value == null ? "" : String(r.before_value);
-      const afterV = r.after_value == null ? "" : String(r.after_value);
-
-      doc.font("Helvetica-Bold").text(`${when} - ${who}`);
-      doc.font("Helvetica").text(`${day} - ${target} | ${field}:`, { continued: false });
-      if (beforeV || afterV) {
-        doc.font("Helvetica").text(`antes: ${beforeV || "-"}`);
-        doc.font("Helvetica").text(`depois: ${afterV || "-"}`);
-      }
-      doc.moveDown(0.5);
-
-      if (doc.y > doc.page.height - 160) {
-        doc.addPage({ margin: 36, size: "A4", layout: "portrait" });
-        doc.fontSize(14).text("HISTÃ“RICO DE ALTERAÃ‡Ã•ES (SEMANA)", { align: "center" });
-        doc.moveDown(0.6);
-        doc.fontSize(9);
-      }
-    }
-  }
-}
-
-    // rodapÃ© (institucional): sem "desenvolvido por" no PDF
-    const footer = lastStamp
-      ? (lastActor ? `Último registro: ${lastActor} — ${lastStamp}` : `Último registro: ${lastStamp}`)
-      : "";
-    if (footer) {
-      doc.fontSize(9).text(footer, 0, doc.page.height - 40, { align: "center" });
-    }
-    // sem rodapÃ© de "Ãºltimo registro" (fica somente em DESCRIÃ‡Ã•ES, conforme regra)
+    // sem página de histórico no PDF; somente DESCRIÇÕES (OUTROS / FO*) quando houver conteúdo
 
     doc.end();
   } catch (err) {
