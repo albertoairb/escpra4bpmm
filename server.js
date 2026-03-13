@@ -1311,6 +1311,7 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
     for (const off of OFFICERS) {
       const label = `${fixText(off.rank)} ${officerNameNoAccents(off.name)}`;
       doc.text(label, left, y, { width: colWName, align: "left" });
+      doc.moveTo(left, y+12).lineTo(left+colWName, y+12).stroke();
 
       for (let i = 0; i < dates.length; i++) {
         const k = `${off.canonical_name}|${dates[i]}`;
