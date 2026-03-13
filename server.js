@@ -1396,6 +1396,43 @@ doc.moveDown(0.6);
     }
 
 
+    // folha apartada: alterações operacionais
+    const addOperationalChangesPage = () => {
+      doc.addPage({ margin: 36, size: "A4", layout: "portrait" });
+      doc.fontSize(14).text("ALTERAÇÕES OPERACIONAIS", { align: "center" });
+      doc.moveDown(0.8);
+
+      const weekdayLabels = [
+        "SEGUNDA",
+        "TERÇA",
+        "QUARTA",
+        "QUINTA",
+        "SEXTA",
+        "SÁBADO",
+        "DOMINGO",
+      ];
+
+      const lineStartX = doc.page.margins.left;
+      const lineEndX = doc.page.width - doc.page.margins.right;
+      const lineGap = 14;
+
+      doc.fontSize(10);
+      for (let i = 0; i < dates.length && i < weekdayLabels.length; i++) {
+        const heading = `${weekdayLabels[i]} - ${fmtDDMMYYYY(dates[i])}`;
+        doc.font("Helvetica-Bold").text(heading);
+        doc.moveDown(0.25);
+        for (let j = 0; j < 4; j++) {
+          const yLine = doc.y + 8;
+          doc.moveTo(lineStartX, yLine).lineTo(lineEndX, yLine).stroke();
+          doc.y = yLine + lineGap;
+        }
+        doc.moveDown(0.35);
+      }
+      doc.font("Helvetica");
+    };
+
+    addOperationalChangesPage();
+
     // sem página de histórico no PDF; somente DESCRIÇÕES (OUTROS / FO*) quando houver conteúdo
 
     doc.end();
