@@ -1319,6 +1319,9 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
         doc.text(code || "-", left + colWName + i * colWDay, y, { width: colWDay, align: "center" });
       }
 
+      const rowLineY = y + 12;
+      doc.moveTo(left, rowLineY).lineTo(left + colWName + colWDay * dates.length, rowLineY).stroke();
+
       y += 14;
       if (y > doc.page.height - 140) {
         doc.addPage({ margin: 28, size: "A4", layout: "landscape" });
