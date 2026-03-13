@@ -100,7 +100,7 @@ const ADMIN_NAMES = new Set([
 // CÃ³digos vÃ¡lidos (tudo em MAIÃšSCULO, conforme regra)
 // - FO*: permite descriÃ§Ã£o
 // - FOJ: sem descriÃ§Ã£o
-const CODES = ["EXP", "SR", "MA", "VE", "FOJ", "FO*", "LP", "FÉRIAS", "CFP_DIA", "CFP_NOITE", "OUTROS", "SS", "EXP_SS", "FO", "PF"];
+const CODES = ["EXP", "SR", "MA", "VE", "FOJ", "FO*", "LP", "FÉRIAS", "CURSO", "CFP_DIA", "CFP_NOITE", "OUTROS", "SS", "EXP_SS", "FO", "PF"];
 
 // ===============================
 // APP

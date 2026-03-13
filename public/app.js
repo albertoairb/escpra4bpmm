@@ -109,6 +109,7 @@ function ddmmyyyy_hhmm(isoOrDate) {
       "FO*": "folga (com descrição)",
       "LP": "licença-prêmio",
       "FÉRIAS": "férias",
+      "CURSO": "curso",
       "CFP_DIA": "CFP (dia)",
       "CFP_NOITE": "CFP (noite)",
       "OUTROS": "com descrição",
