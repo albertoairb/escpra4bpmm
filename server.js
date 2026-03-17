@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 const path = require("path");
 const express = require("express");
@@ -41,15 +41,22 @@ function defaultSignatures() {
 }
 
 
-// DB: Railway (URL) > Docker/local (DB_HOST...)
-const DB_URL = (process.env.DB_URL || process.env.MYSQL_URL || process.env.MYSQL_PUBLIC_URL || "").trim();
+// DB: Railway (URL) > variáveis MYSQL_* > variáveis DB_* > localhost (apenas fallback local)
+const DB_URL = (
+  process.env.DATABASE_URL ||
+  process.env.DB_URL ||
+  process.env.MYSQL_URL ||
+  process.env.MYSQL_PUBLIC_URL ||
+  ""
+).trim();
 
-// Defaults para Docker/local (quando DB_URL nÃ£o existir)
-const DB_HOST = (process.env.DB_HOST || "db").trim();
-const DB_PORT = Number(process.env.DB_PORT || 3306);
-const DB_USER = (process.env.DB_USER || "app").trim();
-const DB_PASSWORD = (process.env.DB_PASSWORD || "app").trim();
-const DB_NAME = (process.env.DB_NAME || process.env.DB_DATABASE || "escala").trim();
+// Compatível com Railway e ambiente local.
+// Importante: não usar "db" como fallback em produção, pois esse host costuma existir só no Docker Compose local.
+const DB_HOST = (process.env.MYSQL_HOST || process.env.DB_HOST || "localhost").trim();
+const DB_PORT = Number(process.env.MYSQL_PORT || process.env.DB_PORT || 3306);
+const DB_USER = (process.env.MYSQL_USER || process.env.DB_USER || "root").trim();
+const DB_PASSWORD = (process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || "").trim();
+const DB_NAME = (process.env.MYSQL_DATABASE || process.env.DB_NAME || process.env.DB_DATABASE || "escala").trim();
 
 // ===============================
 // OFICIAIS (lista fixa)
