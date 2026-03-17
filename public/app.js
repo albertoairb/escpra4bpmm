@@ -107,6 +107,7 @@ function ddmmyyyy_hhmm(isoOrDate) {
       "VE": "trabalha tarde",
       "FOJ": "folga (sem descrição)",
       "FO*": "folga (com descrição)",
+      "SV*": "sobreaviso (com descrição)",
       "LP": "licença-prêmio",
       "FÉRIAS": "férias",
       "CURSO": "curso",
@@ -130,7 +131,7 @@ function ddmmyyyy_hhmm(isoOrDate) {
 
   function setLockMsg() {
     if (state.locked) {
-      $("lockMsg").textContent = "edição fechada (sexta 11h até domingo). após isso, somente responsáveis autorizados.";
+      $("lockMsg").textContent = "edição fechada (sexta 15h até domingo). após isso, somente responsáveis autorizados.";
     } else {
       $("lockMsg").textContent = "edição liberada.";
     }
@@ -174,7 +175,7 @@ function buildDescNotes() {
     const o = byCanonical.get(canonical);
     if (!o) continue;
     const code = state.assignments && state.assignments[k] ? String(state.assignments[k]) : "";
-    if (code !== "OUTROS" && code !== "FO*") continue;
+    if (code !== "OUTROS" && !/\*$/.test(code)) continue;
     const text = String(state.notes[k] || "").trim();
     if (!text) continue;
     entries.push({ key: k, iso, o, code, text });
@@ -347,11 +348,11 @@ async function loadChangeLogs() {
         const pendingObs = (pending && typeof pending === "object" && pending.observacao != null) ? String(pending.observacao) : "";
         const savedObs = (state.notes && state.notes[key]) ? String(state.notes[key]) : "";
         ta.value = pendingObs || savedObs || "";
-        ta.style.display = (sel.value === "OUTROS" || sel.value === "FO*") ? "" : "none";
+        ta.style.display = (sel.value === "OUTROS" || /\*$/.test(sel.value)) ? "" : "none";
 
         ta.addEventListener("input", () => {
           const currentCode = String(sel.value || "");
-          if (currentCode !== "OUTROS" && currentCode !== "FO*") return;
+          if (currentCode !== "OUTROS" && !/\*$/.test(currentCode)) return;
           const txt = String(ta.value || "");
           state.pending.set(key, { code: currentCode, observacao: txt });
           td.classList.add("changed");
@@ -361,7 +362,7 @@ async function loadChangeLogs() {
 
         sel.addEventListener("change", () => {
           const v = String(sel.value || "");
-          const needObs = (v === "OUTROS" || v === "FO*");
+          const needObs = (v === "OUTROS" || /\*$/.test(v));
 
           // controla exibição do campo de descrição
           ta.style.display = needObs ? "" : "none";
@@ -453,6 +454,8 @@ async function loadChangeLogs() {
     if (state.me && state.me.is_admin && sig) {
       $("sigLeftName").value = sig.left_name || "";
       $("sigLeftRole").value = sig.left_role || "";
+      $("sigCenterName").value = sig.center_name || "";
+      $("sigCenterRole").value = sig.center_role || "";
       $("sigRightName").value = sig.right_name || "";
       $("sigRightRole").value = sig.right_role || "";
       $("sigMsg").textContent = "";

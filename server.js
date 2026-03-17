@@ -21,20 +21,22 @@ const CUTOVER_WEEK_START = "2026-03-09";
 const WEEK_START_OVERRIDE = (process.env.WEEK_START_OVERRIDE || "").trim();
 
 const JWT_SECRET = (process.env.JWT_SECRET || "troque-este-segredo").trim();
-const DEFAULT_PASSWORD = (process.env.DEFAULT_PASSWORD || "sr123").trim();
+const DEFAULT_PASSWORD = (process.env.DEFAULT_PASSWORD || "aux123").trim();
 
 const CLOSE_FRIDAY_HOUR = Number(process.env.CLOSE_FRIDAY_HOUR || 11);
 
-const SYSTEM_NAME = (process.env.SYSTEM_NAME || "Escala Semanal de Oficiais do 4º BPM/M").trim();
+const SYSTEM_NAME = (process.env.SYSTEM_NAME || "Escala Semanal de Praças do EM – 4º BPM/M").trim();
 const AUTHOR = (process.env.AUTHOR || "Desenvolvido por Alberto Franzini Neto").trim();
 const COPYRIGHT_YEAR = (process.env.COPYRIGHT_YEAR || "2026").toString().trim();
 
 function defaultSignatures() {
   return {
-    left_name: "ALBERTO FRANZINI NETO",
-    left_role: "CH P1/P5",
+    left_name: "AUXILIAR P1",
+    left_role: "",
+    center_name: "ALBERTO FRANZINI NETO",
+    center_role: "CAP PM CH P1/P5",
     right_name: "EDUARDO MOSNA XAVIER",
-    right_role: "SUBCMT BTL",
+    right_role: "MAJ PM SUBCMT",
   };
 }
 
@@ -90,17 +92,19 @@ function fixDentRanks(list) {
 }
 
 
-// ApÃ³s fechamento (sexta 11h+), somente estes podem alterar (qualquer oficial)
+// ApÃ³s fechamento (sexta 15h+), somente estes podem alterar (qualquer oficial)
 const ADMIN_NAMES = new Set([
+  "Fernandes",
   "Alberto Franzini Neto",
   "Eduardo Mosna Xavier",
-  "Helder AntÃ´nio de Paula",
+  "Felipe",
+  "Danielle",
 ]);
 
 // CÃ³digos vÃ¡lidos (tudo em MAIÃšSCULO, conforme regra)
-// - FO*: permite descriÃ§Ã£o
-// - FOJ: sem descriÃ§Ã£o
-const CODES = ["EXP", "SR", "MA", "VE", "FOJ", "FO*", "LP", "FÉRIAS", "CURSO", "CFP_DIA", "CFP_NOITE", "OUTROS", "SS", "EXP_SS", "FO", "PF"];
+// - códigos terminados em * permitem descrição
+// - FOJ: sem descrição
+const CODES = ["EXP", "SR", "MA", "VE", "FOJ", "FO*", "SV*", "LP", "FÉRIAS", "CURSO", "CFP_DIA", "CFP_NOITE", "OUTROS", "SS", "EXP_SS", "FO", "PF"];
 
 // ===============================
 // APP
@@ -269,7 +273,7 @@ function buildDatesForWeek(startYYYYMMDD) {
   return dates;
 }
 
-// Fechamento: sexta-feira às 11h (SÃ£o Paulo) atÃ© domingo
+// Fechamento: sexta-feira às 15h (SÃ£o Paulo) atÃ© domingo
 function isClosedNow() {
   const now = new Date();
   const day = now.getDay(); // 5=sexta
@@ -611,9 +615,9 @@ function buildAssignmentsAndNotesFromLancamentos(rows, validDates) {
     const key = `${canonical}|${iso}`;
     assignments[key] = code;
 
-    // observaÃ§Ã£o sÃ³ faz sentido em OUTROS e FO*
+    // observação só faz sentido em OUTROS e códigos terminados em *
     const obs = (r.observacao == null) ? "" : String(r.observacao).trim();
-    if (obs && (code === "OUTROS" || code === "FO*")) {
+    if (obs && (code === "OUTROS" || /\*$/.test(code))) {
       notes[key] = obs;
 
       // metadados para exibir no sistema/PDF
@@ -1010,17 +1014,21 @@ app.put("/api/signatures", authRequired(true), async (req, res) => {
 
     const left_name = String(req.body && req.body.left_name ? req.body.left_name : cur.left_name).trim();
     const left_role = String(req.body && req.body.left_role ? req.body.left_role : cur.left_role).trim();
+    const center_name = String(req.body && req.body.center_name ? req.body.center_name : cur.center_name).trim();
+    const center_role = String(req.body && req.body.center_role ? req.body.center_role : cur.center_role).trim();
     const right_name = String(req.body && req.body.right_name ? req.body.right_name : cur.right_name).trim();
     const right_role = String(req.body && req.body.right_role ? req.body.right_role : cur.right_role).trim();
 
-    if (!left_name || !right_name) return res.status(400).json({ error: "nome das assinaturas Ã© obrigatÃ³rio" });
-    if (left_name.length > 120 || right_name.length > 120) return res.status(400).json({ error: "nome muito longo" });
-    if (left_role.length > 120 || right_role.length > 120) return res.status(400).json({ error: "cargo/funÃ§Ã£o muito longo" });
+    if (!left_name || !center_name || !right_name) return res.status(400).json({ error: "nome das assinaturas é obrigatório" });
+    if (left_name.length > 120 || center_name.length > 120 || right_name.length > 120) return res.status(400).json({ error: "nome muito longo" });
+    if (left_role.length > 120 || center_role.length > 120 || right_role.length > 120) return res.status(400).json({ error: "cargo/função muito longa" });
 
     st.meta = st.meta || {};
     st.meta.signatures = {
       left_name: left_name.toUpperCase(),
       left_role: left_role.toUpperCase(),
+      center_name: center_name.toUpperCase(),
+      center_role: center_role.toUpperCase(),
       right_name: right_name.toUpperCase(),
       right_role: right_role.toUpperCase(),
     };
@@ -1075,7 +1083,7 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
     const actor = req.user.canonical_name;
 
     if (locked && !req.user.is_admin) {
-      return res.status(423).json({ error: "ediÃ§Ã£o fechada (sexta 11h atÃ© domingo)" });
+      return res.status(423).json({ error: "ediÃ§Ã£o fechada (sexta 15h atÃ© domingo)" });
     }
 
     const validDates = new Set(st.dates || []);
@@ -1105,7 +1113,7 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
       const beforeCode = (st.assignments && st.assignments[key]) ? String(st.assignments[key]) : "";
       const beforeObs = (st.notes && st.notes[key]) ? String(st.notes[key]) : "";
 
-      const needObs = (code === "OUTROS" || code === "FO*");
+      const needObs = (code === "OUTROS" || /\*$/.test(code));
       const newObs = needObs ? String(u.observacao == null ? "" : u.observacao).trim() : "";
 
       // atualiza state_store (permite limpar)
@@ -1227,7 +1235,7 @@ app.get("/api/pdf", pdfAuth, async (req, res) => {
 
     // prefere dados do MySQL (escala_lancamentos); fallback para state_store
     let assignments = st.assignments || {};
-    // descriÃ§Ãµes (OUTROS/FO*) salvas no state_store (fallback)
+    // descrições (OUTROS/códigos com asterisco) salvas no state_store (fallback)
     const baseNotes = (st.notes && typeof st.notes === "object") ? st.notes : {};
     const baseMeta = (st.notes_meta && typeof st.notes_meta === "object") ? st.notes_meta : {};
 
@@ -1247,7 +1255,7 @@ app.get("/api/pdf", pdfAuth, async (req, res) => {
         // merge defensivo: se o DB nÃ£o tiver observaÃ§Ã£o (ou vier NULL/vazio), mantÃ©m o state_store
         for (const k of Object.keys(baseNotes)) {
           const codeNow = assignments && assignments[k] ? String(assignments[k]) : "";
-          if (codeNow !== "OUTROS" && codeNow !== "FO*") continue;
+          if (codeNow !== "OUTROS" && !/\*$/.test(codeNow)) continue;
           const dbVal = (notes && notes[k] != null) ? String(notes[k]).trim() : "";
           if (!dbVal) {
             const v = String(baseNotes[k] || "").trim();
@@ -1299,7 +1307,7 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
     const colWDay = 80;
 
     // header row
-    doc.fontSize(9).text("OFICIAL", left, top, { width: colWName, align: "left" });
+    doc.fontSize(9).text("PRAÇA", left, top, { width: colWName, align: "left" });
     for (let i = 0; i < dates.length; i++) {
       doc.text(fmtDDMMYYYY(dates[i]), left + colWName + i * colWDay, top, { width: colWDay, align: "center" });
     }
@@ -1328,35 +1336,42 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
         y = doc.y;
       }
     }
-
     // assinaturas sempre na primeira página
     {
-      const xLeft = doc.page.margins.left;
-      const xRight = doc.page.width / 2 + 20;
-      const lineW = (doc.page.width - doc.page.margins.left - doc.page.margins.right - 40) / 2;
+      const leftMargin = doc.page.margins.left;
+      const usableW = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+      const gap = 18;
+      const lineW = (usableW - (gap * 2)) / 3;
+      const xLeft = leftMargin;
+      const xCenter = xLeft + lineW + gap;
+      const xRight = xCenter + lineW + gap;
       const yLine = doc.page.height - 100;
 
       const sig = (st.meta && st.meta.signatures) ? st.meta.signatures : defaultSignatures();
 
       doc.moveTo(xLeft, yLine).lineTo(xLeft + lineW, yLine).stroke();
+      doc.moveTo(xCenter, yLine).lineTo(xCenter + lineW, yLine).stroke();
       doc.moveTo(xRight, yLine).lineTo(xRight + lineW, yLine).stroke();
 
       doc.fontSize(10).text(String(sig.left_name || "").toUpperCase(), xLeft, yLine + 6, { width: lineW, align: "center" });
       doc.fontSize(9).text(String(sig.left_role || "").toUpperCase(), xLeft, yLine + 22, { width: lineW, align: "center" });
 
+      doc.fontSize(10).text(String(sig.center_name || "").toUpperCase(), xCenter, yLine + 6, { width: lineW, align: "center" });
+      doc.fontSize(9).text(String(sig.center_role || "").toUpperCase(), xCenter, yLine + 22, { width: lineW, align: "center" });
+
       doc.fontSize(10).text(String(sig.right_name || "").toUpperCase(), xRight, yLine + 6, { width: lineW, align: "center" });
       doc.fontSize(9).text(String(sig.right_role || "").toUpperCase(), xRight, yLine + 22, { width: lineW, align: "center" });
     }
 
-    // detalhamento de descriÃ§Ãµes (OUTROS e FO*)
+    // detalhamento de descrições (OUTROS e códigos com asterisco)
     const noteEntries = [];
     for (const k of Object.keys(notes || {})) {
       const [canonical, iso] = k.split("|");
       const off = OFFICERS.find(o => o.canonical_name === canonical);
       if (!off) continue;
       const code = assignments[k] ? String(assignments[k]) : "";
-      // sÃ³ imprime descriÃ§Ãµes para OUTROS e FO*
-      if (code !== "OUTROS" && code !== "FO*") continue;
+      // só imprime descrições para OUTROS e códigos com asterisco
+      if (code !== "OUTROS" && !/\*$/.test(code)) continue;
       const meta = (notes_meta && notes_meta[k]) ? notes_meta[k] : null;
       noteEntries.push({ iso, off, code, text: notes[k], meta });
     }
@@ -1364,7 +1379,7 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
 
     if (noteEntries.length) {
       doc.addPage({ margin: 36, size: "A4", layout: "portrait" });
-      doc.fontSize(14).text("DESCRIÇÕES (OUTROS / FO*)", { align: "center" });
+      doc.fontSize(14).text("DESCRIÇÕES (OUTROS / CÓDIGOS COM ASTERISCO)", { align: "center" });
       doc.moveDown(0.6);
       // registro institucional (somente aqui, conforme regra)
       if (lastStamp) {
@@ -1392,7 +1407,7 @@ if (it.meta && (it.meta.updated_at || it.meta.updated_by || it.meta.created_by))
 doc.moveDown(0.6);
         if (doc.y > doc.page.height - 180) {
           doc.addPage({ margin: 36, size: "A4", layout: "portrait" });
-          doc.fontSize(14).text("DESCRIÇÕES (OUTROS / FO*)", { align: "center" });
+          doc.fontSize(14).text("DESCRIÇÕES (OUTROS / CÓDIGOS COM ASTERISCO)", { align: "center" });
           doc.moveDown(0.6);
           doc.fontSize(10);
         }

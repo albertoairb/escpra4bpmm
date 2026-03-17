@@ -1,7 +1,7 @@
 {
-  "name": "escala-oficiais",
+  "name": "escala-pracas-em",
   "version": "1.0.0",
-  "description": "Escala Semanal de Oficiais",
+  "description": "Escala Semanal de Praças do EM",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

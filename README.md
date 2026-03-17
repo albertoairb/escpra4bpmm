@@ -1,9 +1,9 @@
-# Escala Semanal de Oficiais do 4º BPM/M
+# Escala Semanal de Praças do EM – 4º BPM/M
 
 ## Regras principais
-- login com senha padrão `sr123` e troca obrigatória no primeiro acesso
+- login com senha padrão `aux123` e troca obrigatória no primeiro acesso
 - segunda a domingo
-- fechamento: sexta-feira às 11h (após isso, somente: Alberto Franzini Neto / Eduardo Mosna Xavier / Helder Antônio de Paula)
+- fechamento: sexta-feira às 15h (após isso, somente: Alberto Franzini Neto / Eduardo Mosna Xavier / Helder Antônio de Paula)
 - reset semanal: domingo -> segunda 00:00 (zera apenas os registros da escala; mantém nomes)
 - todos podem ler PDF
 
