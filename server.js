@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 const path = require("path");
 const express = require("express");
@@ -41,7 +41,7 @@ function defaultSignatures() {
 }
 
 
-// DB: Railway (URL) > variáveis MYSQL_* > variáveis DB_* > localhost (apenas fallback local)
+// DB: Railway/produção > variáveis MYSQL_* e MYSQL* > variáveis DB_* > localhost (fallback local)
 const DB_URL = (
   process.env.DATABASE_URL ||
   process.env.URL_DO_BANCO_DE_DADOS ||
@@ -51,19 +51,55 @@ const DB_URL = (
   ""
 ).trim();
 
-const SAFE_DB_URL = (
-  /^mysql:\/\/[^:@\/\s]+(?::[^@\/\s]*)?@[^:\/\s]+:\d+\/[A-Za-z0-9_$.-]+(?:\?.*)?$/i.test(DB_URL)
+const SAFE_DB_URL =
+  DB_URL &&
+  /^mysql:\/\/[^:@\/\s]+:[^@\/\s]*@[^:\/\s]+:\d+\/[^\/\s]+$/i.test(DB_URL)
     ? DB_URL
-    : ""
-);
+    : "";
 
 // Compatível com Railway e ambiente local.
-// Importante: não usar "db" como fallback em produção, pois esse host costuma existir só no Docker Compose local.
-const DB_HOST = (process.env.MYSQL_HOST || process.env.DB_HOST || "localhost").trim();
-const DB_PORT = Number(process.env.MYSQL_PORT || process.env.DB_PORT || 3306);
-const DB_USER = (process.env.MYSQL_USER || process.env.DB_USER || "root").trim();
-const DB_PASSWORD = (process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || "").trim();
-const DB_NAME = (process.env.MYSQL_DATABASE || process.env.DB_NAME || process.env.DB_DATABASE || "escala").trim();
+// Importante: não usar "db" como fallback em produção.
+const DB_HOST = (
+  process.env.DB_HOST ||
+  process.env.MYSQL_HOST ||
+  process.env.MYSQLHOST ||
+  process.env.HOST_DO_BANCO_DE_DADOS ||
+  "localhost"
+).trim();
+
+const DB_PORT = Number(
+  process.env.DB_PORT ||
+  process.env.MYSQL_PORT ||
+  process.env.MYSQLPORT ||
+  process.env.PORTA_DO_BANCO_DE_DADOS ||
+  3306
+);
+
+const DB_USER = (
+  process.env.DB_USER ||
+  process.env.MYSQL_USER ||
+  process.env.MYSQLUSER ||
+  process.env.USUARIO_DO_BANCO_DE_DADOS ||
+  "root"
+).trim();
+
+const DB_PASSWORD = (
+  process.env.DB_PASSWORD ||
+  process.env.MYSQL_PASSWORD ||
+  process.env.MYSQLPASSWORD ||
+  process.env.SENHA_DO_BANCO_DE_DADOS ||
+  ""
+).trim();
+
+const DB_NAME = (
+  process.env.DB_NAME ||
+  process.env.DB_DATABASE ||
+  process.env.MYSQL_DATABASE ||
+  process.env.MYSQLDATABASE ||
+  process.env.NOME_DO_BANCO_DE_DADOS ||
+  "escala"
+).trim();
+
 
 // ===============================
 // OFICIAIS (lista fixa)
