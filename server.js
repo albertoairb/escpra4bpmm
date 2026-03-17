@@ -41,64 +41,91 @@ function defaultSignatures() {
 }
 
 
-// DB: Railway/produção > variáveis MYSQL_* e MYSQL* > variáveis DB_* > localhost (fallback local)
-const DB_URL = (
-  process.env.DATABASE_URL ||
-  process.env.URL_DO_BANCO_DE_DADOS ||
-  process.env.DB_URL ||
-  process.env.MYSQL_URL ||
-  process.env.MYSQL_PUBLIC_URL ||
-  ""
-).trim();
+// DB: prioriza URL válida; se não houver, usa host/porta/usuário/senha.
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    const s = String(value ?? "").trim();
+    if (s) return s;
+  }
+  return "";
+}
 
-const SAFE_DB_URL =
-  DB_URL &&
-  /^mysql:\/\/[^:@\/\s]+:[^@\/\s]*@[^:\/\s]+:\d+\/[^\/\s]+$/i.test(DB_URL)
-    ? DB_URL
-    : "";
+function normalizeMySqlUrl(raw) {
+  const s = String(raw ?? "").trim();
+  if (!s) return "";
+  if (!/^mysql:\/\//i.test(s)) return "";
+  try {
+    const u = new URL(s);
+    if (!u.hostname || !u.port || !u.pathname || u.pathname === "/" || !u.username) return "";
+    return s;
+  } catch (_err) {
+    return "";
+  }
+}
 
-// Compatível com Railway e ambiente local.
-// Importante: não usar "db" como fallback em produção.
-const DB_HOST = (
-  process.env.DB_HOST ||
-  process.env.MYSQL_HOST ||
-  process.env.MYSQLHOST ||
-  process.env.HOST_DO_BANCO_DE_DADOS ||
-  "localhost"
-).trim();
-
-const DB_PORT = Number(
-  process.env.DB_PORT ||
-  process.env.MYSQL_PORT ||
-  process.env.MYSQLPORT ||
-  process.env.PORTA_DO_BANCO_DE_DADOS ||
-  3306
+const DB_URL = normalizeMySqlUrl(
+  firstNonEmpty(
+    process.env.DATABASE_URL,
+    process.env.URL_DO_BANCO_DE_DADOS,
+    process.env.DB_URL,
+    process.env.MYSQL_URL,
+    process.env.MYSQL_PUBLIC_URL
+  )
 );
 
-const DB_USER = (
-  process.env.DB_USER ||
-  process.env.MYSQL_USER ||
-  process.env.MYSQLUSER ||
-  process.env.USUARIO_DO_BANCO_DE_DADOS ||
+const DB_HOST = firstNonEmpty(
+  process.env.DB_HOST,
+  process.env.MYSQL_HOST,
+  process.env.MYSQLHOST,
+  process.env.HOST_DO_BANCO_DE_DADOS,
+  process.env.RAILWAY_TCP_PROXY_DOMAIN,
+  "localhost"
+);
+
+const DB_PORT = Number(
+  firstNonEmpty(
+    process.env.DB_PORT,
+    process.env.MYSQL_PORT,
+    process.env.MYSQLPORT,
+    process.env.PORTA_DO_BANCO_DE_DADOS,
+    process.env.RAILWAY_TCP_PROXY_PORT,
+    3306
+  )
+);
+
+const DB_USER = firstNonEmpty(
+  process.env.DB_USER,
+  process.env.MYSQL_USER,
+  process.env.MYSQLUSER,
+  process.env.USUARIO_DO_BANCO_DE_DADOS,
   "root"
-).trim();
+);
 
-const DB_PASSWORD = (
-  process.env.DB_PASSWORD ||
-  process.env.MYSQL_PASSWORD ||
-  process.env.MYSQLPASSWORD ||
-  process.env.SENHA_DO_BANCO_DE_DADOS ||
+const DB_PASSWORD = firstNonEmpty(
+  process.env.DB_PASSWORD,
+  process.env.MYSQL_PASSWORD,
+  process.env.MYSQLPASSWORD,
+  process.env.SENHA_DO_BANCO_DE_DADOS,
   ""
-).trim();
+);
 
-const DB_NAME = (
-  process.env.DB_NAME ||
-  process.env.DB_DATABASE ||
-  process.env.MYSQL_DATABASE ||
-  process.env.MYSQLDATABASE ||
-  process.env.NOME_DO_BANCO_DE_DADOS ||
+const DB_NAME = firstNonEmpty(
+  process.env.DB_NAME,
+  process.env.DB_DATABASE,
+  process.env.MYSQL_DATABASE,
+  process.env.MYSQLDATABASE,
+  process.env.NOME_DO_BANCO_DE_DADOS,
   "escala"
-).trim();
+);
+
+const DB_DEBUG = {
+  hasDatabaseUrl: Boolean(DB_URL),
+  host: DB_HOST,
+  port: DB_PORT,
+  user: DB_USER,
+  database: DB_NAME,
+};
+console.log("[DB CONFIG]", DB_DEBUG);
 
 
 // ===============================
@@ -196,8 +223,8 @@ app.use(express.static(path.join(__dirname, "public"), {
 // ===============================
 // DB POOL
 // ===============================
-const pool = SAFE_DB_URL
-  ? mysql.createPool(SAFE_DB_URL)
+const pool = DB_URL
+  ? mysql.createPool(DB_URL)
   : mysql.createPool({
       host: DB_HOST,
       port: DB_PORT,
