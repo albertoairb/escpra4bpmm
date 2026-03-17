@@ -58,37 +58,54 @@ const DB_NAME = (process.env.DB_NAME || process.env.DB_DATABASE || "escala").tri
 // - name: nome completo a exibir
 // ===============================
 const OFFICERS = [
-  { canonical_name: "Helder AntÃ´nio de Paula", rank: "Ten Cel PM", name: "Helder AntÃ´nio de Paula" },
-  { canonical_name: "Eduardo Mosna Xavier", rank: "Maj PM", name: "Eduardo Mosna Xavier" },
-  { canonical_name: "Alessandra Paula Tonolli", rank: "Maj PM", name: "Alessandra Paula Tonolli" },
-  { canonical_name: "Carlos Bordim Neto", rank: "Cap PM", name: "Carlos Bordim Neto" },
-  { canonical_name: "Alberto Franzini Neto", rank: "Cap PM", name: "Alberto Franzini Neto" },
-  { canonical_name: "Marcio Saito Essaki", rank: "Cap PM", name: "Marcio Saito Essaki" },
-  { canonical_name: "Daniel Alves de Siqueira", rank: "1º Ten PM", name: "Daniel Alves de Siqueira" },
-  { canonical_name: "Mateus Pedro Teodoro", rank: "1º Ten PM", name: "Mateus Pedro Teodoro" },
-  { canonical_name: "Fernanda Bruno Pomponio Martignago", rank: "1º Ten Dent PM", name: "Fernanda Bruno Pomponio Martignago" },
-  { canonical_name: "Dayana de Oliveira Silva Almeida", rank: "1º Ten Dent PM", name: "Dayana de Oliveira Silva Almeida" },
-
-  { canonical_name: "AndrÃ© Santarelli de Paula", rank: "Cap PM", name: "AndrÃ© Santarelli de Paula" },
-  { canonical_name: "Vinicio Augusto Voltarelli Tavares", rank: "Cap PM", name: "Vinicio Augusto Voltarelli Tavares" },
-  { canonical_name: "Jose Antonio Marciano Neto", rank: "Cap PM", name: "Jose Antonio Marciano Neto" },
-
-  { canonical_name: "Uri Filipe dos Santos", rank: "1º Ten PM", name: "Uri Filipe dos Santos" },
-  { canonical_name: "AntÃ´nio OvÃ­dio Ferrucio Cardoso", rank: "1º Ten PM", name: "AntÃ´nio OvÃ­dio Ferrucio Cardoso" },
-  { canonical_name: "Bruno AntÃ£o de Oliveira", rank: "1º Ten PM", name: "Bruno AntÃ£o de Oliveira" },
-  { canonical_name: "Larissa Amadeu Leite", rank: "1º Ten PM", name: "Larissa Amadeu Leite" },
-  { canonical_name: "Renato Fernandes Freire", rank: "1º Ten PM", name: "Renato Fernandes Freire" },
-  { canonical_name: "Raphael Mecca Sampaio", rank: "1º Ten PM", name: "Raphael Mecca Sampaio" },
+  { canonical_name: "Fernandes", rank: "1º SGT PM", name: "Fernandes" },
+  { canonical_name: "Felipe", rank: "CB PM", name: "Felipe" },
+  { canonical_name: "Danielle", rank: "2º SGT PM", name: "Danielle" },
+  { canonical_name: "Diane", rank: "SD PM", name: "Diane" },
+  { canonical_name: "Rabelo", rank: "CB PM", name: "Rabelo" },
+  { canonical_name: "Naiara Garcia", rank: "SD PM", name: "Naiara Garcia" },
+  { canonical_name: "Freitas", rank: "SD PM", name: "Freitas" },
+  { canonical_name: "Ferreira", rank: "2º SGT PM", name: "Ferreira" },
+  { canonical_name: "Henrique Dias", rank: "CB PM", name: "Henrique Dias" },
+  { canonical_name: "R. Fernandes", rank: "SD PM", name: "R. Fernandes" },
+  { canonical_name: "Donizetti", rank: "1º SGT PM", name: "Donizetti" },
+  { canonical_name: "E. Batista", rank: "CB PM", name: "E. Batista" },
+  { canonical_name: "Moises", rank: "SD PM", name: "Moises" },
+  { canonical_name: "Figueiredo", rank: "CB PM", name: "Figueiredo" },
+  { canonical_name: "Karina", rank: "SD PM", name: "Karina" },
+  { canonical_name: "Queila", rank: "Subten PM", name: "Queila" },
+  { canonical_name: "Scatolin", rank: "Subten PM", name: "Scatolin" },
+  { canonical_name: "Valmir Santos", rank: "1º SGT PM", name: "Valmir Santos" },
+  { canonical_name: "Aquino", rank: "CB PM", name: "Aquino" },
+  { canonical_name: "Barbara", rank: "SD PM", name: "Barbara" },
+  { canonical_name: "Diana", rank: "CB PM", name: "Diana" },
+  { canonical_name: "Kelly", rank: "CB PM", name: "Kelly" },
+  { canonical_name: "Canha", rank: "CB PM", name: "Canha" },
+  { canonical_name: "Tino", rank: "CB PM", name: "Tino" },
+  { canonical_name: "Artur", rank: "CB PM", name: "Artur" },
+  { canonical_name: "Vitor Vieira", rank: "CB PM", name: "Vitor Vieira" },
+  { canonical_name: "Assali", rank: "CB PM", name: "Assali" },
+  { canonical_name: "Romani", rank: "SD PM", name: "Romani" },
+  { canonical_name: "Vieira", rank: "CB PM", name: "Vieira" },
+  { canonical_name: "Onofre", rank: "CB PM", name: "Onofre" },
+  { canonical_name: "Pivetta", rank: "CB PM", name: "Pivetta" },
+  { canonical_name: "Aguiar", rank: "CB PM", name: "Aguiar" },
+  { canonical_name: "De Almeida", rank: "SD PM", name: "De Almeida" },
+  { canonical_name: "Vicente", rank: "SD PM", name: "Vicente" },
+  { canonical_name: "Milton", rank: "CB PM", name: "Milton" },
+  { canonical_name: "Diego", rank: "SD PM", name: "Diego" },
+  { canonical_name: "Cassimiro", rank: "CB PM", name: "Cassimiro" },
+  { canonical_name: "Coelho Silva", rank: "SD PM", name: "Coelho Silva" },
+  { canonical_name: "Silvio", rank: "CB PM", name: "Silvio" },
+  { canonical_name: "Julio Cesar", rank: "CB PM", name: "Julio Cesar" },
+  { canonical_name: "Valdileno", rank: "CB PM", name: "Valdileno" },
+  { canonical_name: "Meireles", rank: "SD PM", name: "Meireles" },
+  { canonical_name: "Santiago", rank: "SD PM", name: "Santiago" },
+  { canonical_name: "Ricardo Horacio", rank: "CB PM", name: "Ricardo Horacio" },
 ];
             
-// override visual para postos (Ten Dent) — garante exibiÃ§Ã£o correta no state e no PDF
 function fixDentRanks(list) {
-  return (Array.isArray(list) ? list : []).map(o => {
-    if (!o || typeof o !== "object") return o;
-    if (o.canonical_name === "Fernanda Bruno Pomponio Martignago") return { ...o, rank: "1º Ten Dent PM" };
-    if (o.canonical_name === "Dayana de Oliveira Silva Almeida") return { ...o, rank: "1º Ten Dent PM" };
-    return o;
-  });
+  return (Array.isArray(list) ? list : []).map(o => ({ ...o }));
 }
 
 
