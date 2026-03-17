@@ -20,7 +20,7 @@ const CUTOVER_WEEK_START = "2026-03-09";
 // Se quiser forÃ§ar manualmente a semana exibida (ex.: liberar semana futura), defina WEEK_START_OVERRIDE=YYYY-MM-DD (segunda-feira)
 const WEEK_START_OVERRIDE = (process.env.WEEK_START_OVERRIDE || "").trim();
 
-const JWT_SECRET = (process.env.JWT_SECRET || process.env.SUPERVISOR_KEY || process.env.CHAVE_DO_SUPERVISOR || "troque-este-segredo").trim();
+const JWT_SECRET = (process.env.JWT_SECRET || "troque-este-segredo").trim();
 const DEFAULT_PASSWORD = (process.env.DEFAULT_PASSWORD || "aux123").trim();
 
 const CLOSE_FRIDAY_HOUR = Number(process.env.CLOSE_FRIDAY_HOUR || 11);
@@ -42,35 +42,28 @@ function defaultSignatures() {
 
 
 // DB: Railway (URL) > variáveis MYSQL_* > variáveis DB_* > localhost (apenas fallback local)
-const DB_URL_RAW = (
+const DB_URL = (
   process.env.DATABASE_URL ||
   process.env.URL_DO_BANCO_DE_DADOS ||
   process.env.DB_URL ||
   process.env.MYSQL_URL ||
-  process.env.URL_MYSQL ||
   process.env.MYSQL_PUBLIC_URL ||
   ""
 ).trim();
 
-function isValidMysqlUrl(value) {
-  if (!value) return false;
-  try {
-    const u = new URL(value);
-    return ["mysql:", "mysql2:"].includes(u.protocol) && !!u.hostname;
-  } catch (_e) {
-    return false;
-  }
-}
-
-const DB_URL = isValidMysqlUrl(DB_URL_RAW) ? DB_URL_RAW : "";
+const SAFE_DB_URL = (
+  /^mysql:\/\/[^:@\/\s]+(?::[^@\/\s]*)?@[^:\/\s]+:\d+\/[A-Za-z0-9_$.-]+(?:\?.*)?$/i.test(DB_URL)
+    ? DB_URL
+    : ""
+);
 
 // Compatível com Railway e ambiente local.
 // Importante: não usar "db" como fallback em produção, pois esse host costuma existir só no Docker Compose local.
-const DB_HOST = (process.env.MYSQL_HOST || process.env.DB_HOST || process.env.DB_HOSTNAME || "localhost").trim();
-const DB_PORT = Number(process.env.MYSQL_PORT || process.env.DB_PORT || process.env.PORTA_DO_BANCO_DE_DADOS || 3306);
-const DB_USER = (process.env.MYSQL_USER || process.env.DB_USER || process.env.USUARIO_DO_BANCO_DE_DADOS || "root").trim();
-const DB_PASSWORD = (process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || process.env.SENHA_DO_BANCO_DE_DADOS || "").trim();
-const DB_NAME = (process.env.MYSQL_DATABASE || process.env.DB_NAME || process.env.DB_DATABASE || process.env.NOME_DO_BANCO_DE_DADOS || "escala").trim();
+const DB_HOST = (process.env.MYSQL_HOST || process.env.DB_HOST || "localhost").trim();
+const DB_PORT = Number(process.env.MYSQL_PORT || process.env.DB_PORT || 3306);
+const DB_USER = (process.env.MYSQL_USER || process.env.DB_USER || "root").trim();
+const DB_PASSWORD = (process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || "").trim();
+const DB_NAME = (process.env.MYSQL_DATABASE || process.env.DB_NAME || process.env.DB_DATABASE || "escala").trim();
 
 // ===============================
 // OFICIAIS (lista fixa)
@@ -167,8 +160,8 @@ app.use(express.static(path.join(__dirname, "public"), {
 // ===============================
 // DB POOL
 // ===============================
-const pool = DB_URL
-  ? mysql.createPool(DB_URL)
+const pool = SAFE_DB_URL
+  ? mysql.createPool(SAFE_DB_URL)
   : mysql.createPool({
       host: DB_HOST,
       port: DB_PORT,
