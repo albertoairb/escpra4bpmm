@@ -1,0 +1,14 @@
+Arquivo gerado para corrigir a inicialização no Railway com MySQL.
+
+Conteúdo do ZIP:
+- server.js
+
+Uso:
+1. faça backup do seu server.js atual
+2. substitua pelo server.js deste ZIP
+3. no Railway, prefira usar DATABASE_URL
+4. redeploy
+
+Observação importante:
+Este server.js é uma base segura para conexão com Railway + MySQL.
+Se o seu projeto tiver rotas próprias já prontas, será necessário reencaixá-las neste arquivo.
