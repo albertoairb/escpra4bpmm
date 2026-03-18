@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   "use strict";
 
   const $ = (id) => document.getElementById(id);
@@ -17,7 +17,7 @@
     pending: new Map() // key -> { code, observacao }
   };
 
-  // modal de descrição (OUTROS / FO*)
+  // modal de descrição (OUTROS / códigos com *)
   const descModal = {
     open: false,
     key: null,
@@ -102,22 +102,21 @@ function ddmmyyyy_hhmm(isoOrDate) {
 
     const help = {
       "EXP": "expediente",
-      "SR": "supervisor regional",
       "MA": "trabalha manhã",
       "VE": "trabalha tarde",
       "FOJ": "folga (sem descrição)",
       "FO*": "folga (com descrição)",
-      "SV*": "sobreaviso (com descrição)",
+      "SV": "serviço",
+      "SV*": "serviço (com descrição)",
       "LP": "licença-prêmio",
       "FÉRIAS": "férias",
       "CURSO": "curso",
-      "CFP_DIA": "CFP (dia)",
-      "CFP_NOITE": "CFP (noite)",
       "OUTROS": "com descrição",
-      "SS": "superior de sobreaviso",
-      "EXP_SS": "expediente superior de sobreaviso",
       "FO": "folga",
-      "PF": "ponto facultativo"
+      "PF": "ponto facultativo",
+      "EXP_A.F": "expediente A.F",
+      "VE A.F": "VE A.F",
+      "MA A.F": "MA A.F"
     };
 
     for (const c of (state.codes || [])) {
@@ -338,7 +337,7 @@ async function loadChangeLogs() {
         const noteText = (state.notes && state.notes[key]) ? String(state.notes[key]) : "";
         sel.title = noteText || "";
 
-        // campo de descrição inline (somente OUTROS / FO*)
+        // campo de descrição inline (somente OUTROS / códigos com *)
         const ta = document.createElement("textarea");
         ta.className = "noteInput";
         ta.rows = 3;
@@ -387,7 +386,7 @@ async function loadChangeLogs() {
           }
 
           if (needObs) {
-            // ao selecionar OUTROS/FO*, mantém o texto atual (ou o já salvo) e marca pendente
+            // ao selecionar OUTROS/códigos com *, mantém o texto atual (ou o já salvo) e marca pendente
             const txt = String(ta.value || savedObs || "");
             ta.value = txt;
             sel.title = txt.trim();
@@ -641,6 +640,8 @@ function logout() {
     const payload = {
       left_name: $("sigLeftName").value,
       left_role: $("sigLeftRole").value,
+      center_name: $("sigCenterName").value,
+      center_role: $("sigCenterRole").value,
       right_name: $("sigRightName").value,
       right_role: $("sigRightRole").value,
     };
