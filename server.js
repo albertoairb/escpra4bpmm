@@ -181,13 +181,36 @@ const TRUE_ADMIN_NAMES = new Set(
   USER_DIRECTORY.filter(u => !!u.is_admin).map(u => String(u.canonical_name || "").trim())
 );
 
-// Após fechamento (sexta 15h+), somente estes 5 perfis podem alterar a escala inteira
+// Após fechamento (sexta 15h+), somente estes 5 perfis podem alterar a escala inteira.
+// Aceita também variações de digitação/login usadas na prática.
 const POST_LOCK_EDITOR_NAMES = new Set([
-  "Fernandes",
-  "Felipe",
-  "Danielle",
-  "Alberto Franzini Neto",
-  "Eduardo Mosna Xavier",
+  // Fernandes
+  normKey("Fernandes"),
+  normKey("1º SGT PM Fernandes"),
+
+  // Felipe
+  normKey("Felipe"),
+  normKey("CB PM Felipe"),
+
+  // Danielle / Dani
+  normKey("Danielle"),
+  normKey("Dani"),
+  normKey("2º SGT PM Danielle"),
+  normKey("2º SGT PM Dani"),
+
+  // Alberto
+  normKey("Alberto Franzini Neto"),
+  normKey("Cap PM Alberto Franzini Neto"),
+  normKey("Capitão PM Alberto Franzini Neto"),
+  normKey("Alberto"),
+
+  // Major Mosna
+  normKey("Eduardo Mosna Xavier"),
+  normKey("Maj PM Eduardo Mosna Xavier"),
+  normKey("Major PM Eduardo Mosna Xavier"),
+  normKey("Maj Mosna"),
+  normKey("Major Mosna"),
+  normKey("Mosna"),
 ]);
 
 // CÃ³digos vÃ¡lidos (tudo em MAIÃšSCULO, conforme regra)
@@ -377,8 +400,18 @@ function isAdminName(canonicalName) {
   return TRUE_ADMIN_NAMES.has(String(canonicalName || "").trim());
 }
 
-function canEditAfterLockName(canonicalName) {
-  return POST_LOCK_EDITOR_NAMES.has(String(canonicalName || "").trim());
+function canEditAfterLockName(nameOrAlias) {
+  const raw = String(nameOrAlias || "").trim();
+  if (!raw) return false;
+
+  // 1) bate direto pelo nome/alias normalizado
+  const nk = normKey(raw);
+  if (POST_LOCK_EDITOR_NAMES.has(nk)) return true;
+
+  // 2) tenta resolver para o usuário canônico e valida novamente
+  const resolved = resolveOfficerFromInput(raw);
+  if (!resolved || !resolved.canonical_name) return false;
+  return POST_LOCK_EDITOR_NAMES.has(normKey(resolved.canonical_name));
 }
 
 // ===============================
