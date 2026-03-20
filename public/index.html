@@ -25,35 +25,41 @@
       <h1>acesso</h1>
       <label>
         GRADUAÇÃO + NOME DE GUERRA (MAIÚSCULO)
-        <input id="loginName" placeholder="ex.: CB PM SILVA" />
+        <input id="loginName" />
       </label>
       <label>
         senha
-        <input id="loginPass" type="password" placeholder="aux123" />
+        <input id="loginPass" type="password" />
       </label>
       <button id="btnLogin" class="btn btn--primary">entrar</button>
       <div class="muted" id="loginMsg"></div>
     </section>
 
-    <!-- RESTANTE IGUAL (não alterado) -->
-
     <section id="changeBox" class="card" style="display:none;">
       <h1>troca obrigatória de senha</h1>
-      <div class="muted">primeiro acesso: defina uma nova senha para continuar.</div>
-      <label>
-        nova senha
-        <input id="newPass1" type="password" />
-      </label>
-      <label>
-        confirmar nova senha
-        <input id="newPass2" type="password" />
-      </label>
-      <button id="btnChange" class="btn btn--primary">salvar e continuar</button>
-      <div class="muted" id="changeMsg"></div>
+      <label><input id="newPass1" type="password" /></label>
+      <label><input id="newPass2" type="password" /></label>
+      <button id="btnChange" class="btn btn--primary">salvar</button>
+      <div id="changeMsg"></div>
     </section>
 
     <section id="appBox" class="card" style="display:none;">
-      <!-- tudo permanece igual -->
+      <div id="lockMsg"></div>
+      <div id="userMsg"></div>
+
+      <div id="legend"></div>
+
+      <table id="table"></table>
+
+      <button id="btnSave" class="btn btn--primary">salvar</button>
+      <div id="saveMsg"></div>
+
+      <div id="opsNotes"></div>
+      <div id="descBox"><div id="descNotes"></div></div>
+
+      <div id="historyBox" style="display:none;">
+        <div id="historyTable"></div>
+      </div>
     </section>
   </main>
 
