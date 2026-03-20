@@ -25,11 +25,11 @@
       <h1>acesso</h1>
       <label>
         GRADUAÇÃO + NOME DE GUERRA (MAIÚSCULO)
-        <input id="loginName" />
+        <input id="loginName" placeholder="ex.: CB PM SILVA" />
       </label>
       <label>
         senha
-        <input id="loginPass" type="password" />
+        <input id="loginPass" type="password" placeholder="aux123" />
       </label>
       <button id="btnLogin" class="btn btn--primary">entrar</button>
       <div class="muted" id="loginMsg"></div>
@@ -37,31 +37,91 @@
 
     <section id="changeBox" class="card" style="display:none;">
       <h1>troca obrigatória de senha</h1>
-      <label><input id="newPass1" type="password" /></label>
-      <label><input id="newPass2" type="password" /></label>
-      <button id="btnChange" class="btn btn--primary">salvar</button>
-      <div id="changeMsg"></div>
+      <div class="muted">primeiro acesso: defina uma nova senha para continuar.</div>
+      <label>
+        nova senha
+        <input id="newPass1" type="password" />
+      </label>
+      <label>
+        confirmar nova senha
+        <input id="newPass2" type="password" />
+      </label>
+      <button id="btnChange" class="btn btn--primary">salvar e continuar</button>
+      <div class="muted" id="changeMsg"></div>
     </section>
 
     <section id="appBox" class="card" style="display:none;">
-      <div id="lockMsg"></div>
-      <div id="userMsg"></div>
-
-      <div id="legend"></div>
-
-      <table id="table"></table>
-
-      <button id="btnSave" class="btn btn--primary">salvar</button>
-      <div id="saveMsg"></div>
-
-      <div id="opsNotes"></div>
-      <div id="descBox"><div id="descNotes"></div></div>
-
-      <div id="historyBox" style="display:none;">
-        <div id="historyTable"></div>
+      <div class="row">
+        <div class="muted" id="lockMsg"></div>
+        <div class="muted" id="userMsg"></div>
       </div>
+
+      <div class="tablewrap">
+        <table id="table"></table>
+      </div>
+
+      <div class="legend" id="legend"></div>
+
+      <div class="row row--actions">
+        <button id="btnSave" class="btn btn--primary">salvar</button>
+        <div class="muted" id="saveMsg"></div>
+      </div>
+
+      <details id="descBox" class="descbox" style="display:none;">
+        <summary>descrições (OUTROS / códigos com *)</summary>
+        <div class="muted">as descrições digitadas aparecem aqui e também no PDF.</div>
+        <div id="descNotes" class="descnotes"></div>
+      </details>
+
+      <details id="historyBox" class="descbox" style="display:none;">
+        <summary>histórico de alterações</summary>
+        <div class="muted">visível apenas para administrador.</div>
+        <div id="historyTable" class="descnotes"></div>
+      </details>
+
+      <details id="sigBox" class="descbox" style="display:none;">
+        <summary>assinaturas do PDF</summary>
+        <div class="muted">somente responsáveis autorizados podem editar.</div>
+        <div class="siggrid">
+          <div class="sigcard">
+            <div class="sigtitle">assinatura 1</div>
+            <label>nome<input id="sigLeftName" /></label>
+            <label>cargo/função<input id="sigLeftRole" /></label>
+          </div>
+          <div class="sigcard">
+            <div class="sigtitle">assinatura 2</div>
+            <label>nome<input id="sigCenterName" /></label>
+            <label>cargo/função<input id="sigCenterRole" /></label>
+          </div>
+          <div class="sigcard">
+            <div class="sigtitle">assinatura 3</div>
+            <label>nome<input id="sigRightName" /></label>
+            <label>cargo/função<input id="sigRightRole" /></label>
+          </div>
+        </div>
+        <div class="row row--actions">
+          <button id="btnSigSave" class="btn">salvar assinaturas</button>
+          <div class="muted" id="sigMsg"></div>
+        </div>
+      </details>
+
+      <div id="opsNotes" style="display:none;"></div>
+      <footer class="foot" id="footerMark"></footer>
     </section>
   </main>
+
+  <div id="outrosModal" class="modal" style="display:none;">
+    <div class="modal__card">
+      <h3 id="descModalTitle">descrição</h3>
+      <div class="muted" id="descModalHint">digite a descrição.</div>
+      <textarea id="outrosText" rows="6" placeholder="descreva aqui..."></textarea>
+      <div class="muted" id="outrosMsg"></div>
+      <div class="modal__actions">
+        <button id="outrosCancel" class="btn btn--ghost">cancelar</button>
+        <button id="outrosSave" class="btn btn--primary">salvar</button>
+      </div>
+    </div>
+  </div>
 
   <script src="./app.js"></script>
 </body>

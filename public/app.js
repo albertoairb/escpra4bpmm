@@ -143,6 +143,7 @@ function ddmmyyyy_hhmm(isoOrDate) {
 
   function buildOpsNotes() {
     const box = $("opsNotes");
+    if (!box) return;
     box.innerHTML = "";
     for (let i = 0; i < state.dates.length; i++) {
       const iso = state.dates[i];
@@ -202,17 +203,19 @@ function buildDescNotes() {
     body.textContent = it.text;
     div.appendChild(body);
 
+    const meta = state.notes_meta && state.notes_meta[it.key] ? state.notes_meta[it.key] : null;
+    if (meta && (meta.updated_at || meta.updated_by || meta.created_by)) {
+      const metaLine = document.createElement("div");
+      metaLine.className = "muted";
+      const dt = meta.updated_at ? ddmmyyyy_hhmm(meta.updated_at) : "";
+      const by = meta.updated_by || meta.created_by || "";
+      metaLine.textContent = `${dt ? "atualizado em " + dt : ""}${(dt && by) ? " por " : ""}${by ? by : ""}`.trim();
+      if (metaLine.textContent) div.appendChild(metaLine);
+    }
 
-const meta = state.notes_meta && state.notes_meta[it.key] ? state.notes_meta[it.key] : null;
-if (meta && (meta.updated_at || meta.updated_by || meta.created_by)) {
-  const metaLine = document.createElement("div");
-  metaLine.className = "muted";
-  const dt = meta.updated_at ? ddmmyyyy_hhmm(meta.updated_at) : "";
-  const by = meta.updated_by || meta.created_by || "";
-  metaLine.textContent = `${dt ? "atualizado em " + dt : ""}${(dt && by) ? " por " : ""}${by ? by : ""}`.trim();
-  if (metaLine.textContent) div.appendChild(metaLine);
+    box.appendChild(div);
+  }
 }
-
 
 function hideChangeLogs() {
   const box = $("historyBox");
@@ -260,13 +263,7 @@ async function loadChangeLogs() {
   table.innerHTML = html;
 }
 
-    box.appendChild(div);
-  }
-}
-
-
-
-  function canEditOfficer(officerCanonical) {
+function canEditOfficer(officerCanonical) {
     if (!state.me) return false;
     if (state.me.is_admin) return true;
     if (state.locked) return !!state.me.can_edit_after_lock;
@@ -275,6 +272,7 @@ async function loadChangeLogs() {
 
   function buildTable() {
     const table = $("table");
+    if (!table) return;
     table.innerHTML = "";
 
     const thead = document.createElement("thead");
