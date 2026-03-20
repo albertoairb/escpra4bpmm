@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   "use strict";
 
   const $ = (id) => document.getElementById(id);
@@ -265,6 +265,7 @@ async function loadChangeLogs() {
 }
 
 
+
   function canEditOfficer(officerCanonical) {
     if (!state.me) return false;
     if (state.me.is_admin) return true;
@@ -431,6 +432,7 @@ async function loadChangeLogs() {
     state.codes = r.data.codes || [];
     state.assignments = r.data.assignments || {};
     state.notes = r.data.notes || {};
+    state.notes_meta = r.data.notes_meta || {};
     state.pending.clear();
 
     setHeader();
