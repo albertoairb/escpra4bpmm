@@ -176,14 +176,18 @@ function fixDentRanks(list) {
 }
 
 
-// ApÃ³s fechamento (sexta 15h+), somente estes podem alterar (qualquer oficial)
-const ADMIN_NAMES = new Set([
+// Perfis administrativos reais (assinaturas, histórico e permissões elevadas de administração)
+const TRUE_ADMIN_NAMES = new Set(
+  USER_DIRECTORY.filter(u => !!u.is_admin).map(u => String(u.canonical_name || "").trim())
+);
+
+// Após fechamento (sexta 15h+), somente estes 5 perfis podem alterar a escala inteira
+const POST_LOCK_EDITOR_NAMES = new Set([
   "Fernandes",
   "Felipe",
   "Danielle",
   "Alberto Franzini Neto",
   "Eduardo Mosna Xavier",
-  "Helder Antônio de Paula",
 ]);
 
 // CÃ³digos vÃ¡lidos (tudo em MAIÃšSCULO, conforme regra)
@@ -370,7 +374,11 @@ function isClosedNow() {
 }
 
 function isAdminName(canonicalName) {
-  return ADMIN_NAMES.has(String(canonicalName || "").trim());
+  return TRUE_ADMIN_NAMES.has(String(canonicalName || "").trim());
+}
+
+function canEditAfterLockName(canonicalName) {
+  return POST_LOCK_EDITOR_NAMES.has(String(canonicalName || "").trim());
 }
 
 // ===============================
@@ -765,7 +773,7 @@ async function getStateAutoReset() {
 // ===============================
 function signToken(me) {
   return jwt.sign(
-    { canonical_name: me.canonical_name, is_admin: !!me.is_admin, must_change: !!me.must_change },
+    { canonical_name: me.canonical_name, is_admin: !!me.is_admin, can_edit_after_lock: !!me.can_edit_after_lock, must_change: !!me.must_change },
     JWT_SECRET,
     { expiresIn: "14d" }
   );
@@ -790,6 +798,7 @@ function pdfAuth(req, res, next) {
       req.user = {
         canonical_name: String(payload.canonical_name || "").trim(),
         is_admin: !!payload.is_admin,
+        can_edit_after_lock: !!payload.can_edit_after_lock,
         must_change: !!payload.must_change,
       };
       return next();
@@ -975,6 +984,7 @@ app.post("/api/login", async (req, res) => {
     const me = {
       canonical_name: off.canonical_name,
       is_admin: !!off.is_admin || isAdminName(off.canonical_name),
+      can_edit_after_lock: canEditAfterLockName(off.canonical_name),
       must_change: !!userRow.must_change,
     };
 
@@ -1060,7 +1070,8 @@ app.get("/api/state", authRequired(true), async (req, res) => {
       ok: true,
       me: {
         canonical_name: req.user.canonical_name,
-        is_admin: req.user.is_admin,
+        is_admin: !!req.user.is_admin,
+        can_edit_after_lock: !!req.user.can_edit_after_lock,
       },
       meta: {
         system_name: fixText(SYSTEM_NAME),
@@ -1160,7 +1171,7 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
     const locked = isClosedNow();
     const actor = req.user.canonical_name;
 
-    if (locked && !req.user.is_admin) {
+    if (locked && !req.user.can_edit_after_lock) {
       return res.status(423).json({ error: "ediÃ§Ã£o fechada (sexta 15h atÃ© domingo)" });
     }
 
@@ -1177,8 +1188,9 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
       let target = String(u.canonical_name || "").trim();
       if (!officersByCanonical.has(target)) continue;
 
-      // regra: durante a semana, nÃ£o-admin sÃ³ pode mexer na prÃ³pria linha
-      if (!req.user.is_admin) {
+      // regra: durante a semana, quem não é admin só pode mexer na própria linha
+      // após o fechamento, os 5 perfis autorizados podem mexer em qualquer linha
+      if (!req.user.is_admin && !(locked && req.user.can_edit_after_lock)) {
         target = actor;
       }
 

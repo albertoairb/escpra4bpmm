@@ -268,7 +268,8 @@ async function loadChangeLogs() {
   function canEditOfficer(officerCanonical) {
     if (!state.me) return false;
     if (state.me.is_admin) return true;
-    return officerCanonical === state.me.canonical_name && !state.locked;
+    if (state.locked) return !!state.me.can_edit_after_lock;
+    return officerCanonical === state.me.canonical_name;
   }
 
   function buildTable() {
