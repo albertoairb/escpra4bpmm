@@ -110,6 +110,8 @@ function ddmmyyyy_hhmm(isoOrDate) {
       "SV*": "serviço (com descrição)",
       "LP": "licença-prêmio",
       "FÉRIAS": "férias",
+      "FERIADO": "feriado",
+      "CONVALESCENÇA": "convalescença",
       "CURSO": "curso",
       "OUTROS": "com descrição",
       "FO": "folga",
