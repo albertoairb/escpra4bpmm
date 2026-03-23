@@ -635,6 +635,10 @@ function resolveCanonicalFromDbOfficer(oficialStr) {
   if (!nk) return null;
   for (const off of OFFICERS) {
     const ok = normKey(off.canonical_name);
+    if (ok && nk === ok) return off.canonical_name;
+  }
+  for (const off of OFFICERS) {
+    const ok = normKey(off.canonical_name);
     if (ok && (nk.includes(ok) || ok.includes(nk))) return off.canonical_name;
   }
   return null;
@@ -1053,9 +1057,9 @@ app.get("/api/state", authRequired(true), async (req, res) => {
       const rows = await fetchLancamentosForPeriod(st.period.start, st.period.end);
       const built = buildAssignmentsAndNotesFromLancamentos(rows, st.dates);
       if (Object.keys(built.assignments).length) {
-        assignments = built.assignments;
-        notes = built.notes;
-        notes_meta = built.notes_meta || {};
+        assignments = { ...built.assignments, ...(st.assignments || {}) };
+        notes = { ...(built.notes || {}), ...(baseNotes || {}) };
+        notes_meta = { ...(built.notes_meta || {}), ...(baseMeta || {}) };
       }
     } catch (_e) {
       // se a tabela ainda nÃ£o existir em algum ambiente, mantÃ©m state_store
@@ -1192,7 +1196,7 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
     const locked = isClosedNow();
     const actor = req.user.canonical_name;
 
-    if (locked && !req.user.is_admin) {
+    if (locked && !req.user.is_admin && !req.user.can_edit_after_lock && !canEditAfterLockName(req.user.canonical_name)) {
       return res.status(423).json({ error: "ediÃ§Ã£o fechada (sexta 15h atÃ© domingo)" });
     }
 
@@ -1357,10 +1361,10 @@ app.get("/api/pdf", pdfAuth, async (req, res) => {
       const rows = await fetchLancamentosForPeriod(st.period.start, st.period.end);
       const built = buildAssignmentsAndNotesFromLancamentos(rows, dates);
       if (Object.keys(built.assignments).length) {
-        assignments = built.assignments;
-        // DB passa a ser a fonte primÃ¡ria, mas fazemos merge defensivo com o state_store
-        notes = (built.notes && typeof built.notes === "object") ? built.notes : {};
-        notes_meta = (built.notes_meta && typeof built.notes_meta === "object") ? built.notes_meta : {};
+        assignments = { ...built.assignments, ...(st.assignments || {}) };
+        // DB passa a ser a fonte primÃ¡ria, mas o state_store sobrepõe chaves ausentes ou mais recentes
+        notes = { ...((built.notes && typeof built.notes === "object") ? built.notes : {}), ...baseNotes };
+        notes_meta = { ...((built.notes_meta && typeof built.notes_meta === "object") ? built.notes_meta : {}), ...baseMeta };
         usedDb = true;
         // merge defensivo: se o DB nÃ£o tiver observaÃ§Ã£o (ou vier NULL/vazio), mantÃ©m o state_store
         for (const k of Object.keys(baseNotes)) {
