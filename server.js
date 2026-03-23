@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 const path = require("path");
 const express = require("express");
@@ -169,6 +169,47 @@ const USER_DIRECTORY = (() => {
     ...u,
     is_admin: !!u.is_admin,
   }));
+})();
+
+const USER_DIRECTORY_EXACT_ALIASES = (() => {
+  const map = new Map();
+  for (const user of USER_DIRECTORY) {
+    const aliases = Array.isArray(user.aliases) ? user.aliases : [user.canonical_name];
+    for (const alias of aliases) {
+      const key = normKey(alias);
+      if (!key) continue;
+      if (!map.has(key)) map.set(key, user.canonical_name);
+    }
+
+    const canonicalKey = normKey(user.canonical_name);
+    if (canonicalKey && !map.has(canonicalKey)) {
+      map.set(canonicalKey, user.canonical_name);
+    }
+  }
+  return map;
+})();
+
+const AUTH_AFTER_LOCK_NAMES = [
+  "FERNANDES",
+  "FELIPE",
+  "DANIELLE",
+  "ALBERTO FRANZINI NETO",
+  "MOSNA",
+];
+
+const AUTH_AFTER_LOCK_CANONICAL = (() => {
+  const set = new Set();
+  for (const rawName of AUTH_AFTER_LOCK_NAMES) {
+    const resolved = resolveOfficerFromInput(rawName);
+    if (resolved && resolved.canonical_name) {
+      set.add(resolved.canonical_name);
+      continue;
+    }
+
+    const exact = USER_DIRECTORY_EXACT_ALIASES.get(normKey(rawName));
+    if (exact) set.add(exact);
+  }
+  return set;
 })();
 
 function fixDentRanks(list) {
@@ -374,29 +415,14 @@ function isAdminName(canonicalName) {
 }
 
 
-function normalizeAuthorizedName(name) {
-  return String(name || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase()
-    .replace(/\b(TEN CEL|CEL|MAJ|CAP|TEN|ASP|SUBTEN|ST|SGT|CB|SD)\b/g, "")
-    .replace(/\bPM\b/g, "")
-    .replace(/\b[0-9]+[º°]?\b/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-const AUTH_AFTER_LOCK_NAMES = new Set([
-  "FERNANDES",
-  "FELIPE",
-  "DANIELLE",
-  "ALBERTO FRANZINI NETO",
-  "MOSNA"
-]);
-
 function canEditAfterLockName(name) {
-  const normalized = normalizeAuthorizedName(name);
-  return AUTH_AFTER_LOCK_NAMES.has(normalized);
+  const exact = USER_DIRECTORY_EXACT_ALIASES.get(normKey(name));
+  if (exact && AUTH_AFTER_LOCK_CANONICAL.has(exact)) return true;
+
+  const resolved = resolveOfficerFromInput(name);
+  if (resolved && AUTH_AFTER_LOCK_CANONICAL.has(resolved.canonical_name)) return true;
+
+  return false;
 }
 
 
@@ -633,15 +659,35 @@ function isoFromDbDate(v) {
 function resolveCanonicalFromDbOfficer(oficialStr) {
   const nk = normKey(oficialStr);
   if (!nk) return null;
-  for (const off of OFFICERS) {
-    const ok = normKey(off.canonical_name);
-    if (ok && nk === ok) return off.canonical_name;
+
+  const exact = USER_DIRECTORY_EXACT_ALIASES.get(nk);
+  if (exact) return exact;
+
+  let bestCanonical = null;
+  let bestScore = -1;
+
+  for (const user of USER_DIRECTORY) {
+    const aliases = Array.isArray(user.aliases) ? user.aliases : [user.canonical_name];
+    for (const alias of aliases) {
+      const candidate = normKey(alias);
+      if (!candidate) continue;
+
+      if (nk === candidate) return user.canonical_name;
+
+      let score = 0;
+      if (nk.includes(candidate) || candidate.includes(nk)) {
+        const maxLen = Math.max(nk.length, candidate.length) || 1;
+        score = Math.min(nk.length, candidate.length) / maxLen;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestCanonical = user.canonical_name;
+      }
+    }
   }
-  for (const off of OFFICERS) {
-    const ok = normKey(off.canonical_name);
-    if (ok && (nk.includes(ok) || ok.includes(nk))) return off.canonical_name;
-  }
-  return null;
+
+  return bestScore >= 0.70 ? bestCanonical : null;
 }
 
 async function fetchLancamentosForPeriod(periodStartISO, periodEndISO) {
@@ -1057,9 +1103,9 @@ app.get("/api/state", authRequired(true), async (req, res) => {
       const rows = await fetchLancamentosForPeriod(st.period.start, st.period.end);
       const built = buildAssignmentsAndNotesFromLancamentos(rows, st.dates);
       if (Object.keys(built.assignments).length) {
-        assignments = { ...built.assignments, ...(st.assignments || {}) };
-        notes = { ...(built.notes || {}), ...(baseNotes || {}) };
-        notes_meta = { ...(built.notes_meta || {}), ...(baseMeta || {}) };
+        assignments = built.assignments;
+        notes = built.notes;
+        notes_meta = built.notes_meta || {};
       }
     } catch (_e) {
       // se a tabela ainda nÃ£o existir em algum ambiente, mantÃ©m state_store
@@ -1196,7 +1242,7 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
     const locked = isClosedNow();
     const actor = req.user.canonical_name;
 
-    if (locked && !req.user.is_admin && !req.user.can_edit_after_lock && !canEditAfterLockName(req.user.canonical_name)) {
+    if (locked && !req.user.can_edit_after_lock && !canEditAfterLockName(req.user.canonical_name)) {
       return res.status(423).json({ error: "ediÃ§Ã£o fechada (sexta 15h atÃ© domingo)" });
     }
 
@@ -1361,10 +1407,10 @@ app.get("/api/pdf", pdfAuth, async (req, res) => {
       const rows = await fetchLancamentosForPeriod(st.period.start, st.period.end);
       const built = buildAssignmentsAndNotesFromLancamentos(rows, dates);
       if (Object.keys(built.assignments).length) {
-        assignments = { ...built.assignments, ...(st.assignments || {}) };
-        // DB passa a ser a fonte primÃ¡ria, mas o state_store sobrepõe chaves ausentes ou mais recentes
-        notes = { ...((built.notes && typeof built.notes === "object") ? built.notes : {}), ...baseNotes };
-        notes_meta = { ...((built.notes_meta && typeof built.notes_meta === "object") ? built.notes_meta : {}), ...baseMeta };
+        assignments = built.assignments;
+        // DB passa a ser a fonte primÃ¡ria, mas fazemos merge defensivo com o state_store
+        notes = (built.notes && typeof built.notes === "object") ? built.notes : {};
+        notes_meta = (built.notes_meta && typeof built.notes_meta === "object") ? built.notes_meta : {};
         usedDb = true;
         // merge defensivo: se o DB nÃ£o tiver observaÃ§Ã£o (ou vier NULL/vazio), mantÃ©m o state_store
         for (const k of Object.keys(baseNotes)) {
