@@ -206,31 +206,31 @@ const OFFICERS = [
     "canonical_name": "Artur",
     "rank": "CB PM",
     "name": "ARTUR",
-    "group_label": "MOTOMEC/MANUTENO 12 x 36"
+    "group_label": "MOTOMEC/MANUT 12 x 36"
   },
   {
     "canonical_name": "Vitor Vieira",
     "rank": "CB PM",
     "name": "VITOR VIEIRA",
-    "group_label": "MOTOMEC/MANUTENO 12 x 36"
+    "group_label": "MOTOMEC/MANUT 12 x 36"
   },
   {
     "canonical_name": "Assali",
     "rank": "CB PM",
     "name": "ASSALI",
-    "group_label": "MOTOMEC/MANUTENO 12 x 36"
+    "group_label": "MOTOMEC/MANUT 12 x 36"
   },
   {
     "canonical_name": "Romani",
     "rank": "SD PM",
     "name": "ROMANIN",
-    "group_label": "MOTOMEC/MANUTENO 12 x 36"
+    "group_label": "MOTOMEC/MANUT 12 x 36"
   },
   {
     "canonical_name": "Vieira",
     "rank": "CB PM",
     "name": "VIEIRA",
-    "group_label": "MOTOMEC/MANUTENO 12 x 36"
+    "group_label": "MOTOMEC/MANUT 12 x 36"
   },
   {
     "canonical_name": "Onofre",
@@ -278,25 +278,25 @@ const OFFICERS = [
     "canonical_name": "Cassimiro",
     "rank": "CB PM",
     "name": "CASSIMIRO",
-    "group_label": "RESERVA DE ARMAS BATALHO"
+    "group_label": "RESERVA DE ARMAS BTL"
   },
   {
     "canonical_name": "Coelho Silva",
     "rank": "SD PM",
     "name": "COELHO SILVA",
-    "group_label": "RESERVA DE ARMAS BATALHO"
+    "group_label": "RESERVA DE ARMAS BTL"
   },
   {
     "canonical_name": "Silvio",
     "rank": "CB PM",
     "name": "SILVIO",
-    "group_label": "RESERVA DE ARMAS BATALHO"
+    "group_label": "RESERVA DE ARMAS BTL"
   },
   {
     "canonical_name": "Julio Cesar",
     "rank": "CB PM",
     "name": "JLIO CESAR",
-    "group_label": "RESERVA DE ARMAS BATALHO"
+    "group_label": "RESERVA DE ARMAS BTL"
   },
   {
     "canonical_name": "Valdileno",
@@ -448,8 +448,8 @@ const P1_CONTROLLED_GROUPS = new Set([
 const DONIZETTI_EXTRA_GROUPS = new Set([
   "P/4",
   "APROVISIONAMENTO",
-  "MOTOMEC/MANUTENO 12 x 36",
-  "RESERVA DE ARMAS BATALHO",
+  "MOTOMEC/MANUT 12 x 36",
+  "RESERVA DE ARMAS BTL",
 ]);
 
 function getOfficerByCanonical(canonicalName) {
@@ -1826,7 +1826,7 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
           doc.addPage({ margin: 28, size: "A4", layout: "landscape" });
           y = drawPdfHeader(doc.y);
         }
-        doc.font("Helvetica-Bold").text(String(off.group_label || "SEM DIVISO"), left, y, { width: colWName + colWDay * dates.length, align: "left" });
+        doc.font("Helvetica-Bold").text(String(off.group_label || "SEM DIVISÃO"), left, y, { width: colWName + colWDay * dates.length, align: "left" });
         doc.moveTo(left, y + 12).lineTo(left + colWName + colWDay * dates.length, y + 12).stroke();
         y += 14;
         doc.font("Helvetica");
@@ -1836,7 +1836,7 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
       if (y > doc.page.height - 140) {
         doc.addPage({ margin: 28, size: "A4", layout: "landscape" });
         y = drawPdfHeader(doc.y);
-        doc.font("Helvetica-Bold").text(String(off.group_label || "SEM DIVISO"), left, y, { width: colWName + colWDay * dates.length, align: "left" });
+        doc.font("Helvetica-Bold").text(String(off.group_label || "SEM DIVISÃO"), left, y, { width: colWName + colWDay * dates.length, align: "left" });
         doc.moveTo(left, y + 12).lineTo(left + colWName + colWDay * dates.length, y + 12).stroke();
         y += 14;
         doc.font("Helvetica");

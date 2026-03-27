@@ -309,7 +309,7 @@ async function loadChangeLogs() {
         trg.className = "sectionRow";
         const tdg = document.createElement("td");
         tdg.colSpan = state.dates.length + 1;
-        tdg.textContent = off.group_label || "SEM DIVISO";
+        tdg.textContent = off.group_label || "SEM DIVISÃO";
         trg.appendChild(tdg);
         tbody.appendChild(trg);
         lastGroup = off.group_label;
