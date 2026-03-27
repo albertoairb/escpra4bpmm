@@ -233,7 +233,7 @@ const ADMIN_NAMES = new Set([
 // CÃ³digos vÃ¡lidos (tudo em MAIÃšSCULO, conforme regra)
 // - códigos terminados em * permitem descrição
 // - FOJ: sem descrição
-const CODES = ["EXP", "MA", "VE", "FOJ", "FO", "FO*", "SV", "SV*", "LP", "FÉRIAS", "FERIADO", "CONVALESCENÇA", "CURSO", "OUTROS", "PF", "EXP_A.F", "VE A.F", "MA A.F", "CAS", "EAP"];
+const CODES = ["EXP", "MA", "VE", "FOJ", "FO", "FO*", "SV", "SV*", "LP", "FÉRIAS", "FERIADO", "CONVALESCENÇA", "CURSO", "OUTROS", "PF", "EXP_A.F", "VE A.F", "MA A.F", "CAS", "EAP", "PPJM", "SV_DIA", "SV_NOITE", "DS"];
 
 // ===============================
 // APP

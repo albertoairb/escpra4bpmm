@@ -120,7 +120,11 @@ function ddmmyyyy_hhmm(isoOrDate) {
       "VE A.F": "VE A.F",
       "MA A.F": "MA A.F",
       "CAS": "CAS",
-      "EAP": "EAP"
+      "EAP": "EAP",
+      "PPJM": "PPJM",
+      "SV_DIA": "SV_DIA",
+      "SV_NOITE": "SV_NOITE",
+      "DS": "DS"
     };
 
     for (const c of (state.codes || [])) {
