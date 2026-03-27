@@ -54,8 +54,8 @@ const DB_NAME = (process.env.DB_NAME || process.env.DB_DATABASE || "escala").tri
 // ===============================
 // OFICIAIS (lista fixa)
 // - canonical_name: chave Ãºnica do oficial (sem posto)
-// - rank: posto/graduaÃ§Ã£o a exibir
-// - name: nome completo a exibir
+// - rank: graduação a exibir
+// - name: nome de guerra a exibir
 // ===============================
 const OFFICERS = [
   { canonical_name: "Fernandes", rank: "1º SGT PM", name: "Fernandes" },
@@ -112,6 +112,7 @@ const EXTRA_USERS = [
     aliases: [
       "Alberto Franzini Neto",
       "Cap PM Alberto Franzini Neto",
+      "CAP PM ALBERTO",
       "Capitão PM Alberto Franzini Neto",
       "Alberto",
     ],
@@ -122,6 +123,7 @@ const EXTRA_USERS = [
     aliases: [
       "Eduardo Mosna Xavier",
       "Maj PM Eduardo Mosna Xavier",
+      "MAJ PM MOSNA",
       "Major PM Eduardo Mosna Xavier",
       "Maj Mosna",
       "Major Mosna",
@@ -134,6 +136,7 @@ const EXTRA_USERS = [
     aliases: [
       "Helder Antônio de Paula",
       "Ten Cel PM Helder Antônio de Paula",
+      "TEN CEL PM HELDER",
       "Tenente-Coronel PM Helder Antônio de Paula",
       "Helder",
     ],
@@ -1051,7 +1054,7 @@ app.post("/api/login", async (req, res) => {
     const password = (req.body && req.body.password ? req.body.password : "").toString();
 
     const off = resolveOfficerFromInput(name);
-    if (!off) return res.status(403).json({ error: "nome nÃ£o reconhecido. use posto + nome completo." });
+    if (!off) return res.status(403).json({ error: "nome não reconhecido. use graduação + nome de guerra." });
 
     const userRow = await findOrCreateUser(off.canonical_name);
 

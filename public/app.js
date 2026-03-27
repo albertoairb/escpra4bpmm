@@ -292,7 +292,7 @@ async function loadChangeLogs() {
     const trh = document.createElement("tr");
 
     const thP = document.createElement("th");
-    thP.textContent = "posto";
+    thP.textContent = "graduação";
     trh.appendChild(thP);
 
     const thN = document.createElement("th");
