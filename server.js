@@ -230,7 +230,7 @@ const ADMIN_NAMES = new Set([
 // CÃ³digos vÃ¡lidos (tudo em MAIÃšSCULO, conforme regra)
 // - códigos terminados em * permitem descrição
 // - FOJ: sem descrição
-const CODES = ["EXP", "MA", "VE", "FOJ", "FO", "FO*", "SV", "SV*", "LP", "FÉRIAS", "FERIADO", "CONVALESCENÇA", "CURSO", "OUTROS", "PF", "EXP_A.F", "VE A.F", "MA A.F"];
+const CODES = ["EXP", "MA", "VE", "FOJ", "FO", "FO*", "SV", "SV*", "LP", "FÉRIAS", "FERIADO", "CONVALESCENÇA", "CURSO", "OUTROS", "PF", "EXP_A.F", "VE A.F", "MA A.F", "CAS", "EAP"];
 
 // ===============================
 // APP
@@ -773,6 +773,8 @@ function buildAssignmentsAndNotesFromLancamentos(rows, validDates) {
     if (/^EXP[ _]?A\.?F\.?$/i.test(code)) code = "EXP_A.F";
     if (/^VE[ _]?A\.?F\.?$/i.test(code)) code = "VE A.F";
     if (/^MA[ _]?A\.?F\.?$/i.test(code)) code = "MA A.F";
+    if (/^CAS$/i.test(code)) code = "CAS";
+    if (/^EAP$/i.test(code)) code = "EAP";
 
     if (!validCodes.has(code)) {
       // ignora cÃ³digos desconhecidos/antigos

@@ -118,7 +118,9 @@ function ddmmyyyy_hhmm(isoOrDate) {
       "PF": "ponto facultativo",
       "EXP_A.F": "expediente A.F",
       "VE A.F": "VE A.F",
-      "MA A.F": "MA A.F"
+      "MA A.F": "MA A.F",
+      "CAS": "CAS",
+      "EAP": "EAP"
     };
 
     for (const c of (state.codes || [])) {
