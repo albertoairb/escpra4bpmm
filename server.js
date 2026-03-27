@@ -1083,12 +1083,12 @@ function buildAssignmentsAndNotesFromLancamentos(rows, validDates) {
     if (/^SV\*$/i.test(code)) code = "SV*";
     // mantém PF
     if (/^PF$/i.test(code)) code = "PF";
-    // mantém FÉRIAS (aceita FERIAS)
-    if (/^FERIAS$/i.test(code)) code = "FÉRIAS";
+    // mantém FÉRIAS (aceita FÉRIAS)
+    if (/^FÉRIAS$/i.test(code)) code = "FÉRIAS";
     // mantém FERIADO
     if (/^FERIADO$/i.test(code)) code = "FERIADO";
     // mantém CONVALESCENÇA (aceita sem cedilha)
-    if (/^CONVALESCENCA$/i.test(code)) code = "CONVALESCENÇA";
+    if (/^CONVALESCENÇA$/i.test(code)) code = "CONVALESCENÇA";
     // mantém códigos A.F com e sem underscore/espaços
     if (/^EXP[ _]?A\.?F\.?$/i.test(code)) code = "EXP_A.F";
     if (/^VE[ _]?A\.?F\.?$/i.test(code)) code = "VE A.F";
