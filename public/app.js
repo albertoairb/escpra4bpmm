@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   "use strict";
 
   const $ = (id) => document.getElementById(id);
@@ -17,7 +17,7 @@
     pending: new Map() // key -> { code, observacao }
   };
 
-  // modal de descrição (OUTROS / códigos com *)
+  // modal de descrio (OUTROS / cdigos com *)
   const descModal = {
     open: false,
     key: null,
@@ -48,7 +48,7 @@ function ddmmyyyy_hhmm(isoOrDate) {
 }
 
   function dayNameBR(idx) {
-    const names = ["DOMINGO","SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
+    const names = ["DOMINGO","SEGUNDA","TERA","QUARTA","QUINTA","SEXTA","SBADO"];
     return names[idx] || "";
   }
 
@@ -102,18 +102,18 @@ function ddmmyyyy_hhmm(isoOrDate) {
 
     const help = {
       "EXP": "expediente",
-      "MA": "trabalha manhã",
+      "MA": "trabalha manh",
       "VE": "trabalha tarde",
-      "FOJ": "folga (sem descrição)",
-      "FO*": "folga (com descrição)",
-      "SV": "serviço",
-      "SV*": "serviço (com descrição)",
-      "LP": "licença-prêmio",
-      "FÉRIAS": "férias",
+      "FOJ": "folga (sem descrio)",
+      "FO*": "folga (com descrio)",
+      "SV": "servio",
+      "SV*": "servio (com descrio)",
+      "LP": "licena-prmio",
+      "FRIAS": "frias",
       "FERIADO": "feriado",
-      "CONVALESCENÇA": "convalescença",
+      "CONVALESCENA": "convalescena",
       "CURSO": "curso",
-      "OUTROS": "com descrição",
+      "OUTROS": "com descrio",
       "FO": "folga",
       "PF": "ponto facultativo",
       "EXP_A.F": "expediente A.F",
@@ -131,22 +131,22 @@ function ddmmyyyy_hhmm(isoOrDate) {
       if (!c) continue;
       const div = document.createElement("div");
       div.className = "pill";
-      div.textContent = help[c] ? `${c} – ${help[c]}` : c;
+      div.textContent = help[c] ? `${c}  ${help[c]}` : c;
       el.appendChild(div);
     }
   }
 
   function setLockMsg() {
     if (state.locked) {
-      $("lockMsg").textContent = "edição fechada (sexta 15h até domingo). após isso, somente responsáveis autorizados.";
+      $("lockMsg").textContent = "edio fechada (sexta 15h at domingo). aps isso, somente responsveis autorizados.";
     } else {
-      $("lockMsg").textContent = "edição liberada.";
+      $("lockMsg").textContent = "edio liberada.";
     }
   }
 
   function setUserMsg() {
     if (!state.me) return;
-    $("userMsg").textContent = `usuário: ${state.me.canonical_name}`;
+    $("userMsg").textContent = `usurio: ${state.me.canonical_name}`;
   }
 
   function buildOpsNotes() {
@@ -235,11 +235,11 @@ async function loadChangeLogs() {
   if (!box || !table) return;
 
   box.style.display = "block";
-  table.innerHTML = "<div class='muted'>carregando…</div>";
+  table.innerHTML = "<div class='muted'>carregando</div>";
 
   const r = await api("/api/change_logs?limit=200");
   if (!r.ok) {
-    table.innerHTML = `<div class='muted'>${(r.data && (r.data.error || r.data.details)) ? (r.data.error || r.data.details) : "erro ao carregar histórico"}</div>`;
+    table.innerHTML = `<div class='muted'>${(r.data && (r.data.error || r.data.details)) ? (r.data.error || r.data.details) : "erro ao carregar histrico"}</div>`;
     return;
   }
 
@@ -289,7 +289,7 @@ async function loadChangeLogs() {
     const trh = document.createElement("tr");
 
     const thN = document.createElement("th");
-    thN.textContent = "praça";
+    thN.textContent = "praa";
     trh.appendChild(thN);
 
     for (const iso of state.dates) {
@@ -309,7 +309,7 @@ async function loadChangeLogs() {
         trg.className = "sectionRow";
         const tdg = document.createElement("td");
         tdg.colSpan = state.dates.length + 1;
-        tdg.textContent = off.group_label || "SEM DIVISÃO";
+        tdg.textContent = off.group_label || "SEM DIVISO";
         trg.appendChild(tdg);
         tbody.appendChild(trg);
         lastGroup = off.group_label;
@@ -353,7 +353,7 @@ async function loadChangeLogs() {
         const ta = document.createElement("textarea");
         ta.className = "noteInput";
         ta.rows = 3;
-        ta.placeholder = "descrição...";
+        ta.placeholder = "descrio...";
         ta.disabled = !editable;
 
         const pendingObs = (pending && typeof pending === "object" && pending.observacao != null) ? String(pending.observacao) : "";
@@ -368,7 +368,7 @@ async function loadChangeLogs() {
           state.pending.set(key, { code: currentCode, observacao: txt });
           td.classList.add("changed");
           sel.title = txt.trim();
-          $("saveMsg").textContent = `${state.pending.size} alteração(ões) pendente(s).`;
+          $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
         });
 
         sel.addEventListener("change", () => {
@@ -390,7 +390,7 @@ async function loadChangeLogs() {
               state.pending.delete(key);
               td.classList.remove("changed");
             }
-            $("saveMsg").textContent = `${state.pending.size} alteração(ões) pendente(s).`;
+            $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
             return;
           }
 
@@ -400,14 +400,14 @@ async function loadChangeLogs() {
             sel.title = txt.trim();
             state.pending.set(key, { code: v, observacao: txt });
             td.classList.add("changed");
-            $("saveMsg").textContent = `${state.pending.size} alteração(ões) pendente(s).`;
+            $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
             setTimeout(() => ta.focus(), 0);
             return;
           }
 
           state.pending.set(key, { code: v, observacao: null });
           td.classList.add("changed");
-          $("saveMsg").textContent = `${state.pending.size} alteração(ões) pendente(s).`;
+          $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
         });
 
         td.appendChild(sel);
@@ -448,7 +448,7 @@ async function loadChangeLogs() {
     buildOpsNotes();
     buildDescNotes();
 
-    // histórico (somente admin)
+    // histrico (somente admin)
     if (state.me && state.me.is_admin) {
       await loadChangeLogs();
     } else {
@@ -489,7 +489,7 @@ async function loadChangeLogs() {
       if (sel) sel.value = cur;
       state.pending.delete(key);
       if (td) td.classList.remove("changed");
-      $("saveMsg").textContent = `${state.pending.size} alteração(ões) pendente(s).`;
+      $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
     }
 
     descModal.open = false;
@@ -508,13 +508,13 @@ async function loadChangeLogs() {
 
     const txt = String($("outrosText").value || "").trim();
     if (!txt) {
-      $("outrosMsg").textContent = "a descrição não pode ficar em branco.";
+      $("outrosMsg").textContent = "a descrio no pode ficar em branco.";
       return;
     }
 
     state.pending.set(key, { code: v, observacao: txt });
     if (td) td.classList.add("changed");
-    $("saveMsg").textContent = `${state.pending.size} alteração(ões) pendente(s).`;
+    $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
 
     // tooltip imediato
     if (descModal.selectEl) descModal.selectEl.title = txt;
@@ -536,7 +536,7 @@ async function loadChangeLogs() {
     state.token = r.data.token;
     state.me = r.data.me;
 
-    // força troca de senha
+    // fora troca de senha
     if (r.data.must_change) {
       show("loginBox", false);
       show("changeBox", true);
@@ -557,7 +557,7 @@ async function loadChangeLogs() {
     const p2 = $("newPass2").value;
 
     if (!p1 || p1.length < 6) { $("changeMsg").textContent = "a nova senha deve ter pelo menos 6 caracteres."; return; }
-    if (p1 !== p2) { $("changeMsg").textContent = "as senhas não conferem."; return; }
+    if (p1 !== p2) { $("changeMsg").textContent = "as senhas no conferem."; return; }
 
     const r = await api("/api/change_password", { method: "POST", body: JSON.stringify({ new_password: p1 }) });
     if (!r.ok) {
@@ -574,10 +574,10 @@ async function loadChangeLogs() {
   async function save() {
     if (state.saving) return;
 
-    // garante que mudanças recentes (ex.: fechar select) já entraram em pending
+    // garante que mudanas recentes (ex.: fechar select) j entraram em pending
     await new Promise((resolve) => requestAnimationFrame(resolve));
 
-    if (!state.pending.size) { $("saveMsg").textContent = "nenhuma alteração pendente."; return; }
+    if (!state.pending.size) { $("saveMsg").textContent = "nenhuma alterao pendente."; return; }
 
     state.saving = true;
     $("btnSave").disabled = true;
@@ -598,7 +598,7 @@ async function loadChangeLogs() {
         return;
       }
 
-      // marca salvo antes de recarregar o estado (se o /api/state demorar, o usuário não fica preso)
+      // marca salvo antes de recarregar o estado (se o /api/state demorar, o usurio no fica preso)
       $("saveMsg").textContent = "salvo.";
       await loadState();
     } finally {
@@ -620,9 +620,9 @@ function logout() {
   }
 
   async function openPdf() {
-    // abre em nova aba com link autenticado (window.open não envia headers)
+    // abre em nova aba com link autenticado (window.open no envia headers)
     if (!state.token) {
-      alert("Você precisa estar logado para abrir o PDF.");
+      alert("Voc precisa estar logado para abrir o PDF.");
       return;
     }
 
@@ -640,7 +640,7 @@ function logout() {
   async function saveSignatures() {
     $("sigMsg").textContent = "";
     if (!state.me || !state.me.is_admin) {
-      $("sigMsg").textContent = "sem permissão.";
+      $("sigMsg").textContent = "sem permisso.";
       return;
     }
 
@@ -669,7 +669,7 @@ function logout() {
   $("btnLogout").addEventListener("click", logout);
   $("btnPdf").addEventListener("click", openPdf);
 
-  // modal descrição
+  // modal descrio
   $("outrosCancel").addEventListener("click", () => closeDescModal(true));
   $("outrosSave").addEventListener("click", saveDescModal);
   $("outrosModal").addEventListener("click", (e) => {

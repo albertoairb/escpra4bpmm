@@ -1,0 +1,1 @@
+Correção de acentuação e encoding do front e textos do sistema.
