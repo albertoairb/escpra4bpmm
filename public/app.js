@@ -273,18 +273,11 @@ async function loadChangeLogs() {
 }
 
 
-  function canEditOfficer(officerCanonical) {
-    if (!state.me) return false;
-    if (state.me.is_admin) return true;
-
-    if (!state.locked) {
-      return officerCanonical === state.me.canonical_name;
-    }
-
-    if (state.locked && state.me.can_edit_after_lock) {
-      return true;
-    }
-
+  function canEditOfficer(officer) {
+    if (!state.me || !officer) return false;
+    const baseEditable = !!officer.can_edit;
+    if (!state.locked) return baseEditable;
+    if (state.locked && state.me.can_edit_after_lock) return baseEditable;
     return false;
   }
 
@@ -295,12 +288,8 @@ async function loadChangeLogs() {
     const thead = document.createElement("thead");
     const trh = document.createElement("tr");
 
-    const thP = document.createElement("th");
-    thP.textContent = "graduação";
-    trh.appendChild(thP);
-
     const thN = document.createElement("th");
-    thN.textContent = "nome";
+    thN.textContent = "praça";
     trh.appendChild(thN);
 
     for (const iso of state.dates) {
@@ -312,19 +301,27 @@ async function loadChangeLogs() {
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
+    let lastGroup = null;
 
     for (const off of state.officers) {
+      if (off.group_label !== lastGroup) {
+        const trg = document.createElement("tr");
+        trg.className = "sectionRow";
+        const tdg = document.createElement("td");
+        tdg.colSpan = state.dates.length + 1;
+        tdg.textContent = off.group_label || "SEM DIVISÃO";
+        trg.appendChild(tdg);
+        tbody.appendChild(trg);
+        lastGroup = off.group_label;
+      }
+
       const tr = document.createElement("tr");
 
-      const tdRank = document.createElement("td");
-      tdRank.textContent = off.rank;
-      tr.appendChild(tdRank);
-
       const tdName = document.createElement("td");
-      tdName.innerHTML = `<b>${off.name}</b>`;
+      tdName.innerHTML = `<b>${off.rank} ${off.name}</b>`;
       tr.appendChild(tdName);
 
-      const editable = canEditOfficer(off.canonical_name);
+      const editable = canEditOfficer(off);
 
       for (const iso of state.dates) {
         const td = document.createElement("td");
@@ -350,11 +347,9 @@ async function loadChangeLogs() {
         const pendingCode = (pending && typeof pending === "object") ? (pending.code || "") : pending;
         sel.value = (pendingCode !== null && pendingCode !== undefined) ? pendingCode : cur;
 
-        // tooltip com descrição (quando houver)
         const noteText = (state.notes && state.notes[key]) ? String(state.notes[key]) : "";
         sel.title = noteText || "";
 
-        // campo de descrição inline (somente OUTROS / códigos com *)
         const ta = document.createElement("textarea");
         ta.className = "noteInput";
         ta.rows = 3;
@@ -380,14 +375,11 @@ async function loadChangeLogs() {
           const v = String(sel.value || "");
           const needObs = (v === "OUTROS" || /\*$/.test(v));
 
-          // controla exibição do campo de descrição
           ta.style.display = needObs ? "" : "none";
           if (!needObs) {
-            // se trocou para código sem descrição, limpa tooltip
             sel.title = "";
           }
 
-          // se voltou ao código original, só mantém pendência se a observação mudou
           if (v === cur) {
             const beforeObs = savedObs || "";
             const nowObs = String(ta.value || "");
@@ -403,19 +395,16 @@ async function loadChangeLogs() {
           }
 
           if (needObs) {
-            // ao selecionar OUTROS/códigos com *, mantém o texto atual (ou o já salvo) e marca pendente
             const txt = String(ta.value || savedObs || "");
             ta.value = txt;
             sel.title = txt.trim();
             state.pending.set(key, { code: v, observacao: txt });
             td.classList.add("changed");
             $("saveMsg").textContent = `${state.pending.size} alteração(ões) pendente(s).`;
-            // foco rápido para digitar
             setTimeout(() => ta.focus(), 0);
             return;
           }
 
-          // códigos sem descrição
           state.pending.set(key, { code: v, observacao: null });
           td.classList.add("changed");
           $("saveMsg").textContent = `${state.pending.size} alteração(ões) pendente(s).`;

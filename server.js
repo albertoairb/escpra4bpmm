@@ -58,50 +58,270 @@ const DB_NAME = (process.env.DB_NAME || process.env.DB_DATABASE || "escala").tri
 // - name: nome de guerra a exibir
 // ===============================
 const OFFICERS = [
-  { canonical_name: "Fernandes", rank: "1º SGT PM", name: "Fernandes" },
-  { canonical_name: "Felipe", rank: "CB PM", name: "Felipe" },
-  { canonical_name: "Danielle", rank: "2º SGT PM", name: "Danielle" },
-  { canonical_name: "Diane", rank: "SD PM", name: "Diane" },
-  { canonical_name: "Rabelo", rank: "CB PM", name: "Rabelo" },
-  { canonical_name: "Naiara Garcia", rank: "SD PM", name: "Naiara Garcia" },
-  { canonical_name: "Freitas", rank: "SD PM", name: "Freitas" },
-  { canonical_name: "Ferreira", rank: "2º SGT PM", name: "Ferreira" },
-  { canonical_name: "Henrique Dias", rank: "CB PM", name: "Henrique Dias" },
-  { canonical_name: "R. Fernandes", rank: "SD PM", name: "R. Fernandes" },
-  { canonical_name: "Donizetti", rank: "1º SGT PM", name: "Donizetti" },
-  { canonical_name: "E. Batista", rank: "CB PM", name: "E. Batista" },
-  { canonical_name: "Moises", rank: "SD PM", name: "Moises" },
-  { canonical_name: "Figueiredo", rank: "CB PM", name: "Figueiredo" },
-  { canonical_name: "Karina", rank: "SD PM", name: "Karina" },
-  { canonical_name: "Queila", rank: "Subten PM", name: "Queila" },
-  { canonical_name: "Scatolin", rank: "Subten PM", name: "Scatolin" },
-  { canonical_name: "Valmir Santos", rank: "1º SGT PM", name: "Valmir Santos" },
-  { canonical_name: "Aquino", rank: "CB PM", name: "Aquino" },
-  { canonical_name: "Barbara", rank: "SD PM", name: "Barbara" },
-  { canonical_name: "Diana", rank: "CB PM", name: "Diana" },
-  { canonical_name: "Kelly", rank: "CB PM", name: "Kelly" },
-  { canonical_name: "Canha", rank: "CB PM", name: "Canha" },
-  { canonical_name: "Tino", rank: "CB PM", name: "Tino" },
-  { canonical_name: "Artur", rank: "CB PM", name: "Artur" },
-  { canonical_name: "Vitor Vieira", rank: "CB PM", name: "Vitor Vieira" },
-  { canonical_name: "Assali", rank: "CB PM", name: "Assali" },
-  { canonical_name: "Romani", rank: "SD PM", name: "Romani" },
-  { canonical_name: "Vieira", rank: "CB PM", name: "Vieira" },
-  { canonical_name: "Onofre", rank: "CB PM", name: "Onofre" },
-  { canonical_name: "Pivetta", rank: "CB PM", name: "Pivetta" },
-  { canonical_name: "Aguiar", rank: "CB PM", name: "Aguiar" },
-  { canonical_name: "De Almeida", rank: "SD PM", name: "De Almeida" },
-  { canonical_name: "Vicente", rank: "SD PM", name: "Vicente" },
-  { canonical_name: "Milton", rank: "CB PM", name: "Milton" },
-  { canonical_name: "Diego", rank: "SD PM", name: "Diego" },
-  { canonical_name: "Cassimiro", rank: "CB PM", name: "Cassimiro" },
-  { canonical_name: "Coelho Silva", rank: "SD PM", name: "Coelho Silva" },
-  { canonical_name: "Silvio", rank: "CB PM", name: "Silvio" },
-  { canonical_name: "Julio Cesar", rank: "CB PM", name: "Julio Cesar" },
-  { canonical_name: "Valdileno", rank: "CB PM", name: "Valdileno" },
-  { canonical_name: "Meireles", rank: "SD PM", name: "Meireles" },
-  { canonical_name: "Santiago", rank: "SD PM", name: "Santiago" },
-  { canonical_name: "Ricardo Horacio", rank: "CB PM", name: "Ricardo Horacio" },
+  {
+    "canonical_name": "Fernandes",
+    "rank": "1º SGT PM",
+    "name": "FERNANDES",
+    "group_label": "P/1"
+  },
+  {
+    "canonical_name": "Felipe",
+    "rank": "CB PM",
+    "name": "FELIPE",
+    "group_label": "P/1"
+  },
+  {
+    "canonical_name": "Danielle",
+    "rank": "2º SGT PM",
+    "name": "DANIELLE",
+    "group_label": "P/5"
+  },
+  {
+    "canonical_name": "Diane",
+    "rank": "SD PM",
+    "name": "DIANE",
+    "group_label": "P/5"
+  },
+  {
+    "canonical_name": "Rabelo",
+    "rank": "CB PM",
+    "name": "RABELO",
+    "group_label": "UIS-ODONTO"
+  },
+  {
+    "canonical_name": "Naiara Garcia",
+    "rank": "SD PM",
+    "name": "NAIARA GARCIA",
+    "group_label": "UIS-ODONTO"
+  },
+  {
+    "canonical_name": "Freitas",
+    "rank": "SD PM",
+    "name": "FREITAS",
+    "group_label": "ESTAFETA"
+  },
+  {
+    "canonical_name": "Ferreira",
+    "rank": "2º SGT PM",
+    "name": "FERREIRA",
+    "group_label": "P/3"
+  },
+  {
+    "canonical_name": "Henrique Dias",
+    "rank": "CB PM",
+    "name": "HENRIQUE DIAS",
+    "group_label": "P/3"
+  },
+  {
+    "canonical_name": "R. Fernandes",
+    "rank": "SD PM",
+    "name": "R. FERNANDES",
+    "group_label": "AUX ADM TELEMÁTICA"
+  },
+  {
+    "canonical_name": "Donizetti",
+    "rank": "1º SGT PM",
+    "name": "DONIZETTI",
+    "group_label": "P/4"
+  },
+  {
+    "canonical_name": "E. Batista",
+    "rank": "CB PM",
+    "name": "E. BATISTA",
+    "group_label": "P/4"
+  },
+  {
+    "canonical_name": "Moises",
+    "rank": "SD PM",
+    "name": "MOISES",
+    "group_label": "P/4"
+  },
+  {
+    "canonical_name": "Figueiredo",
+    "rank": "CB PM",
+    "name": "FIGUEIREDO",
+    "group_label": "P/4"
+  },
+  {
+    "canonical_name": "Karina",
+    "rank": "SD PM",
+    "name": "KARINA",
+    "group_label": "P/4"
+  },
+  {
+    "canonical_name": "Queila",
+    "rank": "SUBTEN PM",
+    "name": "QUEILA",
+    "group_label": "PJMD"
+  },
+  {
+    "canonical_name": "Scatolin",
+    "rank": "SUBTEN PM",
+    "name": "SCATOLIN",
+    "group_label": "PJMD"
+  },
+  {
+    "canonical_name": "Valmir Santos",
+    "rank": "1º SGT PM",
+    "name": "VALMIR SANTOS",
+    "group_label": "PJMD"
+  },
+  {
+    "canonical_name": "Aquino",
+    "rank": "CB PM",
+    "name": "AQUINO",
+    "group_label": "PJMD"
+  },
+  {
+    "canonical_name": "Barbara",
+    "rank": "SD PM",
+    "name": "BÁRBARA",
+    "group_label": "PJMD"
+  },
+  {
+    "canonical_name": "Diana",
+    "rank": "CB PM",
+    "name": "DIANA",
+    "group_label": "APROVISIONAMENTO"
+  },
+  {
+    "canonical_name": "Kelly",
+    "rank": "CB PM",
+    "name": "KELLY",
+    "group_label": "APROVISIONAMENTO"
+  },
+  {
+    "canonical_name": "Canha",
+    "rank": "CB PM",
+    "name": "CANHA",
+    "group_label": "MOTORISTAS CMT BTL 12 X 36"
+  },
+  {
+    "canonical_name": "Tino",
+    "rank": "CB PM",
+    "name": "TINO",
+    "group_label": "MOTORISTAS CMT BTL 12 X 36"
+  },
+  {
+    "canonical_name": "Artur",
+    "rank": "CB PM",
+    "name": "ARTUR",
+    "group_label": "MOTOMEC/MANUTENÇÃO 12 X 36"
+  },
+  {
+    "canonical_name": "Vitor Vieira",
+    "rank": "CB PM",
+    "name": "VITOR VIEIRA",
+    "group_label": "MOTOMEC/MANUTENÇÃO 12 X 36"
+  },
+  {
+    "canonical_name": "Assali",
+    "rank": "CB PM",
+    "name": "ASSALI",
+    "group_label": "MOTOMEC/MANUTENÇÃO 12 X 36"
+  },
+  {
+    "canonical_name": "Romani",
+    "rank": "SD PM",
+    "name": "ROMANIN",
+    "group_label": "MOTOMEC/MANUTENÇÃO 12 X 36"
+  },
+  {
+    "canonical_name": "Vieira",
+    "rank": "CB PM",
+    "name": "VIEIRA",
+    "group_label": "MOTOMEC/MANUTENÇÃO 12 X 36"
+  },
+  {
+    "canonical_name": "Onofre",
+    "rank": "CB PM",
+    "name": "ONOFRE",
+    "group_label": "MOTORISTAS CFP 12 X 36"
+  },
+  {
+    "canonical_name": "Pivetta",
+    "rank": "CB PM",
+    "name": "PIVETTA",
+    "group_label": "MOTORISTAS CFP 12 X 36"
+  },
+  {
+    "canonical_name": "Aguiar",
+    "rank": "CB PM",
+    "name": "AGUIAR",
+    "group_label": "MOTORISTAS CFP 12 X 36"
+  },
+  {
+    "canonical_name": "De Almeida",
+    "rank": "SD PM",
+    "name": "DE ALMEIDA",
+    "group_label": "MOTORISTAS CFP 12 X 36"
+  },
+  {
+    "canonical_name": "Vicente",
+    "rank": "CB PM",
+    "name": "VICENTE",
+    "group_label": "MOTORISTAS CFP 12 X 36"
+  },
+  {
+    "canonical_name": "Milton",
+    "rank": "CB PM",
+    "name": "MILTON",
+    "group_label": "MOTORISTAS CFP 12 X 36"
+  },
+  {
+    "canonical_name": "Diego",
+    "rank": "SD PM",
+    "name": "DIEGO",
+    "group_label": "MOTORISTAS CFP 12 X 36"
+  },
+  {
+    "canonical_name": "Cassimiro",
+    "rank": "CB PM",
+    "name": "CASSIMIRO",
+    "group_label": "RESERVA DE ARMAS BATALHÃO"
+  },
+  {
+    "canonical_name": "Coelho Silva",
+    "rank": "SD PM",
+    "name": "COELHO SILVA",
+    "group_label": "RESERVA DE ARMAS BATALHÃO"
+  },
+  {
+    "canonical_name": "Silvio",
+    "rank": "CB PM",
+    "name": "SILVIO",
+    "group_label": "RESERVA DE ARMAS BATALHÃO"
+  },
+  {
+    "canonical_name": "Julio Cesar",
+    "rank": "CB PM",
+    "name": "JÚLIO CESAR",
+    "group_label": "RESERVA DE ARMAS BATALHÃO"
+  },
+  {
+    "canonical_name": "Valdileno",
+    "rank": "CB PM",
+    "name": "VALDILENO",
+    "group_label": "ENCARREGADO DA GUARDA (SERVIÇO DE DIA) 12 X 36"
+  },
+  {
+    "canonical_name": "Meireles",
+    "rank": "SD PM",
+    "name": "MEIRELES",
+    "group_label": "ENCARREGADO DA GUARDA (SERVIÇO DE DIA) 12 X 36"
+  },
+  {
+    "canonical_name": "Santiago",
+    "rank": "SD PM",
+    "name": "SANTIAGO",
+    "group_label": "ENCARREGADO DA GUARDA (SERVIÇO DE DIA) 12 X 36"
+  },
+  {
+    "canonical_name": "Ricardo Horacio",
+    "rank": "CB PM",
+    "name": "RICARDO HORÁCIO",
+    "group_label": "ENCARREGADO DA GUARDA (SERVIÇO DE DIA) 12 X 36"
+  }
 ];
             
 
@@ -217,6 +437,103 @@ const AUTH_AFTER_LOCK_CANONICAL = (() => {
 
 function fixDentRanks(list) {
   return (Array.isArray(list) ? list : []).map(o => ({ ...o }));
+}
+
+
+const P1_GROUP_LABEL = "P/1";
+const P1_CONTROLLED_GROUPS = new Set([
+  "MOTORISTAS CFP 12 X 36",
+  "ENCARREGADO DA GUARDA (SERVIÇO DE DIA) 12 X 36",
+]);
+const DONIZETTI_EXTRA_GROUPS = new Set([
+  "P/4",
+  "APROVISIONAMENTO",
+  "MOTOMEC/MANUTENÇÃO 12 X 36",
+  "RESERVA DE ARMAS BATALHÃO",
+]);
+
+function getOfficerByCanonical(canonicalName) {
+  return OFFICERS.find(o => o.canonical_name === canonicalName) || null;
+}
+
+function getOfficerRoleKind(officer) {
+  const rank = String(officer && officer.rank ? officer.rank : "").toUpperCase();
+  if (rank.startsWith("CB PM") || rank.startsWith("SD PM")) return "cb_sd";
+  return "sgt_subten";
+}
+
+function isP1Controller(user) {
+  if (!user) return false;
+  if (user.is_admin) return true;
+  const officer = getOfficerByCanonical(user.canonical_name);
+  return !!(officer && officer.group_label === P1_GROUP_LABEL);
+}
+
+function isDonizettiUser(user) {
+  return !!(user && String(user.canonical_name || "") === "Donizetti");
+}
+
+function canViewTargetOfficer(user, targetOfficer) {
+  if (!user || !targetOfficer) return false;
+  if (user.is_admin || isP1Controller(user)) return true;
+  if (String(user.canonical_name || "") === String(targetOfficer.canonical_name || "")) return true;
+  if (isDonizettiUser(user) && DONIZETTI_EXTRA_GROUPS.has(String(targetOfficer.group_label || ""))) return true;
+
+  const actorOfficer = getOfficerByCanonical(user.canonical_name);
+  if (!actorOfficer) return false;
+
+  if (getOfficerRoleKind(actorOfficer) === "cb_sd") return false;
+  return String(actorOfficer.group_label || "") === String(targetOfficer.group_label || "");
+}
+
+function canEditTargetOfficer(user, targetOfficer) {
+  if (!canViewTargetOfficer(user, targetOfficer)) return false;
+  if (!user || !targetOfficer) return false;
+  if (user.is_admin || isP1Controller(user)) return true;
+  if (P1_CONTROLLED_GROUPS.has(String(targetOfficer.group_label || ""))) return false;
+
+  const actorOfficer = getOfficerByCanonical(user.canonical_name);
+  if (!actorOfficer) return false;
+
+  if (getOfficerRoleKind(actorOfficer) === "cb_sd") {
+    return String(user.canonical_name || "") === String(targetOfficer.canonical_name || "");
+  }
+
+  if (isDonizettiUser(user) && DONIZETTI_EXTRA_GROUPS.has(String(targetOfficer.group_label || ""))) {
+    return true;
+  }
+
+  return String(actorOfficer.group_label || "") === String(targetOfficer.group_label || "");
+}
+
+function filterStateForUser(user, assignments, notes, notes_meta) {
+  const visibleOfficers = OFFICERS.filter(off => canViewTargetOfficer(user, off));
+  const visibleSet = new Set(visibleOfficers.map(off => off.canonical_name));
+  const filteredAssignments = {};
+  const filteredNotes = {};
+  const filteredNotesMeta = {};
+
+  for (const [key, value] of Object.entries(assignments || {})) {
+    const [canonical] = String(key).split("|");
+    if (visibleSet.has(canonical)) filteredAssignments[key] = value;
+  }
+
+  for (const [key, value] of Object.entries(notes || {})) {
+    const [canonical] = String(key).split("|");
+    if (visibleSet.has(canonical)) filteredNotes[key] = value;
+  }
+
+  for (const [key, value] of Object.entries(notes_meta || {})) {
+    const [canonical] = String(key).split("|");
+    if (visibleSet.has(canonical)) filteredNotesMeta[key] = value;
+  }
+
+  return {
+    visibleOfficers,
+    filteredAssignments,
+    filteredNotes,
+    filteredNotesMeta,
+  };
 }
 
 
@@ -1145,6 +1462,7 @@ app.get("/api/state", authRequired(true), async (req, res) => {
     } catch (_e) {}
 
     const periodLabel = `período: ${fmtDDMMYYYY(st.period.start)} a ${fmtDDMMYYYY(st.period.end)}`;
+    const scoped = filterStateForUser(req.user, assignments, notes, notes_meta);
 
     return res.json({
       ok: true,
@@ -1152,6 +1470,7 @@ app.get("/api/state", authRequired(true), async (req, res) => {
         canonical_name: req.user.canonical_name,
         is_admin: req.user.is_admin,
         can_edit_after_lock: !!req.user.can_edit_after_lock || canEditAfterLockName(req.user.canonical_name),
+        can_view_all_sections: isP1Controller(req.user) || !!req.user.is_admin,
       },
       meta: {
         system_name: fixText(SYSTEM_NAME),
@@ -1161,12 +1480,18 @@ app.get("/api/state", authRequired(true), async (req, res) => {
       },
       locked: isClosedNow(),
       holidays,
-      officers: fixDentRanks(OFFICERS).map(o => ({ ...o, rank: fixText(o.rank), name: officerNameNoAccents(o.name) })),
+      officers: fixDentRanks(scoped.visibleOfficers).map(o => ({
+        ...o,
+        rank: fixText(o.rank),
+        name: officerNameNoAccents(o.name),
+        group_label: fixText(o.group_label),
+        can_edit: canEditTargetOfficer(req.user, o),
+      })),
       dates: st.dates,
       codes: CODES,
-      assignments,
-      notes,
-      notes_meta,
+      assignments: scoped.filteredAssignments,
+      notes: scoped.filteredNotes,
+      notes_meta: scoped.filteredNotesMeta,
     });
   } catch (err) {
     return res.status(500).json({ error: "erro ao carregar", details: err.message });
@@ -1268,10 +1593,9 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
       let target = String(u.canonical_name || "").trim();
       if (!officersByCanonical.has(target)) continue;
 
-      // regra: durante a semana, nÃ£o-admin sÃ³ pode mexer na prÃ³pria linha
-      if (!req.user.is_admin) {
-        target = actor;
-      }
+      const targetOfficer = getOfficerByCanonical(target);
+      if (!targetOfficer) continue;
+      if (!canEditTargetOfficer(req.user, targetOfficer)) continue;
 
       let code = String(u.code || "").trim();
       if (!code) code = ""; // limpar
@@ -1469,26 +1793,58 @@ if (!lastAt || !lastActor) {
 }
 
 const lastStamp = fmtDDMMYYYYHHmm(lastAt);
+    const scoped = filterStateForUser(req.user, assignments, notes, notes_meta);
+    const visibleOfficers = scoped.visibleOfficers;
+    assignments = scoped.filteredAssignments;
+    notes = scoped.filteredNotes;
+    notes_meta = scoped.filteredNotesMeta;
+
     // tabela
     const left = doc.page.margins.left;
     const top = doc.y;
     const colWName = 220;
     const colWDay = 80;
 
-    // header row
-    doc.fontSize(9).text("PRAÇA", left, top, { width: colWName, align: "left" });
-    for (let i = 0; i < dates.length; i++) {
-      doc.text(fmtDDMMYYYY(dates[i]), left + colWName + i * colWDay, top, { width: colWDay, align: "center" });
-    }
-    doc.moveTo(left, top + 14).lineTo(left + colWName + colWDay * dates.length, top + 14).stroke();
+    const drawPdfHeader = (yBase) => {
+      doc.fontSize(9).font("Helvetica-Bold");
+      doc.text("PRAÇA", left, yBase, { width: colWName, align: "left" });
+      for (let i = 0; i < dates.length; i++) {
+        doc.text(fmtDDMMYYYY(dates[i]), left + colWName + i * colWDay, yBase, { width: colWDay, align: "center" });
+      }
+      doc.moveTo(left, yBase + 14).lineTo(left + colWName + colWDay * dates.length, yBase + 14).stroke();
+      doc.font("Helvetica");
+      return yBase + 18;
+    };
 
-    let y = top + 18;
+    let y = drawPdfHeader(top);
 
     doc.fontSize(8);
-    for (const off of OFFICERS) {
+    let lastGroup = null;
+    for (const off of visibleOfficers) {
+      if (off.group_label !== lastGroup) {
+        if (y > doc.page.height - 150) {
+          doc.addPage({ margin: 28, size: "A4", layout: "landscape" });
+          y = drawPdfHeader(doc.y);
+        }
+        doc.font("Helvetica-Bold").text(String(off.group_label || "SEM DIVISÃO"), left, y, { width: colWName + colWDay * dates.length, align: "left" });
+        doc.moveTo(left, y + 12).lineTo(left + colWName + colWDay * dates.length, y + 12).stroke();
+        y += 14;
+        doc.font("Helvetica");
+        lastGroup = off.group_label;
+      }
+
+      if (y > doc.page.height - 140) {
+        doc.addPage({ margin: 28, size: "A4", layout: "landscape" });
+        y = drawPdfHeader(doc.y);
+        doc.font("Helvetica-Bold").text(String(off.group_label || "SEM DIVISÃO"), left, y, { width: colWName + colWDay * dates.length, align: "left" });
+        doc.moveTo(left, y + 12).lineTo(left + colWName + colWDay * dates.length, y + 12).stroke();
+        y += 14;
+        doc.font("Helvetica");
+      }
+
       const label = `${fixText(off.rank)} ${officerNameNoAccents(off.name)}`;
       doc.text(label, left, y, { width: colWName, align: "left" });
-      doc.moveTo(left, y+12).lineTo(left+colWName, y+12).stroke();
+      doc.moveTo(left, y + 12).lineTo(left + colWName, y + 12).stroke();
 
       for (let i = 0; i < dates.length; i++) {
         const k = `${off.canonical_name}|${dates[i]}`;
@@ -1500,10 +1856,6 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
       doc.moveTo(left, rowLineY).lineTo(left + colWName + colWDay * dates.length, rowLineY).stroke();
 
       y += 14;
-      if (y > doc.page.height - 140) {
-        doc.addPage({ margin: 28, size: "A4", layout: "landscape" });
-        y = doc.y;
-      }
     }
     // assinaturas sempre na primeira página
     {
@@ -1536,7 +1888,7 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
     const noteEntries = [];
     for (const k of Object.keys(notes || {})) {
       const [canonical, iso] = k.split("|");
-      const off = OFFICERS.find(o => o.canonical_name === canonical);
+      const off = visibleOfficers.find(o => o.canonical_name === canonical);
       if (!off) continue;
       const code = assignments[k] ? String(assignments[k]) : "";
       // só imprime descrições para OUTROS e códigos com asterisco

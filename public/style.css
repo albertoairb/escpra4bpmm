@@ -114,3 +114,10 @@ table.hist th {
   resize:vertical;
   box-sizing:border-box;
 }
+
+
+.sectionRow td {
+  background: #eef3ff;
+  font-weight: 700;
+  text-transform: uppercase;
+}
