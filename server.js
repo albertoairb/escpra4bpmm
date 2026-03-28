@@ -544,10 +544,9 @@ function filterStateForUser(user, assignments, notes, notes_meta) {
 const ADMIN_NAMES = new Set([
   "Fernandes",
   "Felipe",
-  "Danielle",
   "Alberto Franzini Neto",
   "Eduardo Mosna Xavier",
-  "Helder Antnio de Paula",
+  "Freitas",
 ]);
 
 // Códigos válidos (tudo em MAISCULO, conforme regra)
