@@ -289,7 +289,7 @@ async function loadChangeLogs() {
     const trh = document.createElement("tr");
 
     const thN = document.createElement("th");
-    thN.textContent = "praa";
+    thN.textContent = "PRAÇA";
     trh.appendChild(thN);
 
     for (const iso of state.dates) {
