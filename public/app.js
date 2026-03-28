@@ -353,21 +353,33 @@ async function loadChangeLogs() {
         const ta = document.createElement("textarea");
         ta.className = "noteInput";
         ta.rows = 3;
-        ta.placeholder = "descrio...";
+        ta.placeholder = "nova descrição...";
         ta.disabled = !editable;
 
         const pendingObs = (pending && typeof pending === "object" && pending.observacao != null) ? String(pending.observacao) : "";
         const savedObs = (state.notes && state.notes[key]) ? String(state.notes[key]) : "";
-        ta.value = pendingObs || savedObs || "";
+        ta.value = pendingObs || "";
         ta.style.display = (sel.value === "OUTROS" || /\*$/.test(sel.value)) ? "" : "none";
+        sel.title = savedObs || "";
+
+        const hist = document.createElement("div");
+        hist.className = "cellNote";
+        hist.style.display = savedObs ? "" : "none";
+        hist.textContent = savedObs || "";
+        hist.title = savedObs || "";
 
         ta.addEventListener("input", () => {
           const currentCode = String(sel.value || "");
           if (currentCode !== "OUTROS" && !/\*$/.test(currentCode)) return;
-          const txt = String(ta.value || "");
+          const txt = String(ta.value || "").trim();
+          if (!txt && currentCode === cur) {
+            state.pending.delete(key);
+            td.classList.remove("changed");
+            $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
+            return;
+          }
           state.pending.set(key, { code: currentCode, observacao: txt });
           td.classList.add("changed");
-          sel.title = txt.trim();
           $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
         });
 
@@ -377,13 +389,16 @@ async function loadChangeLogs() {
 
           ta.style.display = needObs ? "" : "none";
           if (!needObs) {
-            sel.title = "";
+            ta.value = "";
+            state.pending.set(key, { code: v, observacao: null });
+            td.classList.add("changed");
+            $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
+            return;
           }
 
           if (v === cur) {
-            const beforeObs = savedObs || "";
-            const nowObs = String(ta.value || "");
-            if (needObs && nowObs !== beforeObs) {
+            const nowObs = String(ta.value || "").trim();
+            if (nowObs) {
               state.pending.set(key, { code: v, observacao: nowObs });
               td.classList.add("changed");
             } else {
@@ -394,24 +409,16 @@ async function loadChangeLogs() {
             return;
           }
 
-          if (needObs) {
-            const txt = String(ta.value || savedObs || "");
-            ta.value = txt;
-            sel.title = txt.trim();
-            state.pending.set(key, { code: v, observacao: txt });
-            td.classList.add("changed");
-            $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
-            setTimeout(() => ta.focus(), 0);
-            return;
-          }
-
-          state.pending.set(key, { code: v, observacao: null });
+          const txt = String(ta.value || "").trim();
+          state.pending.set(key, { code: v, observacao: txt });
           td.classList.add("changed");
           $("saveMsg").textContent = `${state.pending.size} alterao(es) pendente(s).`;
+          setTimeout(() => ta.focus(), 0);
         });
 
         td.appendChild(sel);
         td.appendChild(ta);
+        td.appendChild(hist);
         tr.appendChild(td);
       }
 

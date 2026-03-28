@@ -116,7 +116,7 @@ const OFFICERS = [
     "canonical_name": "R. Fernandes",
     "rank": "SD PM",
     "name": "R. FERNANDES",
-    "group_label": "AUX ADM TELEMTICA"
+    "group_label": "AUX ADM TELEMÁTICA"
   },
   {
     "canonical_name": "Donizetti",
@@ -175,7 +175,7 @@ const OFFICERS = [
   {
     "canonical_name": "Barbara",
     "rank": "SD PM",
-    "name": "BRBARA",
+    "name": "BARBARA",
     "group_label": "PJMD"
   },
   {
@@ -441,7 +441,11 @@ function fixDentRanks(list) {
 
 
 const P1_GROUP_LABEL = "P/1";
+const P1_CONTROLLER_CANONICALS = new Set(["Fernandes", "Felipe", "Freitas"]);
 const P1_CONTROLLED_GROUPS = new Set([
+  "UIS-ODONTO",
+  "ESTAFETA",
+  "AUX ADM TELEMÁTICA",
   "MOTORISTAS CFP 12 x 36",
   "ENCARREGADO DA GUARDA (SERVIO DE DIA) 12 x 36",
 ]);
@@ -465,8 +469,7 @@ function getOfficerRoleKind(officer) {
 function isP1Controller(user) {
   if (!user) return false;
   if (user.is_admin) return true;
-  const officer = getOfficerByCanonical(user.canonical_name);
-  return !!(officer && officer.group_label === P1_GROUP_LABEL);
+  return P1_CONTROLLER_CANONICALS.has(String(user.canonical_name || ""));
 }
 
 function isDonizettiUser(user) {
@@ -632,6 +635,25 @@ function fmtDDMMYYYY(iso) {
   const [y, m, d] = String(iso || "").split("-");
   if (!y || !m || !d) return String(iso || "");
   return `${d}/${m}/${y}`;
+}
+
+function appendObservationHistory(existingObs, newObs, when = new Date()) {
+  const existing = String(existingObs || "").replace(/\r\n/g, "\n").trim();
+  const incoming = String(newObs || "").replace(/\r\n/g, "\n").trim();
+
+  if (!incoming) return existing;
+  if (existing && incoming === existing) return existing;
+  if (existing && incoming.startsWith(existing)) return incoming;
+
+  const stamped = incoming
+    .split(/\n+/)
+    .map((part) => String(part || "").trim())
+    .filter(Boolean)
+    .map((part) => `[${fmtDDMMYYYYHHmm(when)}] ${part}`)
+    .join("\n");
+
+  if (!stamped) return existing;
+  return existing ? `${existing}\n${stamped}` : stamped;
 }
 
 // Formata data/hora em pt-BR (São Paulo) no padrão: dd/mm/aaaa s HHhMM
@@ -1607,22 +1629,30 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
       const beforeObs = (st.notes && st.notes[key]) ? String(st.notes[key]) : "";
 
       const needObs = (code === "OUTROS" || /\*$/.test(code));
-      const newObs = needObs ? String(u.observacao == null ? "" : u.observacao).trim() : "";
+      const incomingObs = needObs ? String(u.observacao == null ? "" : u.observacao).trim() : "";
+      const mergedObs = needObs ? appendObservationHistory(beforeObs, incomingObs, new Date()) : "";
 
       // atualiza state_store (permite limpar)
       st.assignments = st.assignments || {};
       st.notes = st.notes || {};
+      st.notes_meta = st.notes_meta || {};
 
       if (!code) {
         delete st.assignments[key];
         delete st.notes[key];
+        delete st.notes_meta[key];
       } else {
         st.assignments[key] = code;
-        if (needObs) {
-          // grava/atualiza observação mesmo se o código não mudar
-          st.notes[key] = newObs;
-        } else {
+        if (needObs && mergedObs) {
+          st.notes[key] = mergedObs;
+          st.notes_meta[key] = {
+            updated_at: new Date().toISOString(),
+            updated_by: actor,
+            created_by: (st.notes_meta[key] && st.notes_meta[key].created_by) ? st.notes_meta[key].created_by : actor,
+          };
+        } else if (!needObs) {
           delete st.notes[key];
+          delete st.notes_meta[key];
         }
       }
 
@@ -1631,7 +1661,7 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
         if (!code) {
           await safeQuery("DELETE FROM escala_lancamentos WHERE data=? AND oficial=?", [date, target]);
         } else {
-          const obsToSave = needObs ? newObs : null;
+          const obsToSave = (needObs && mergedObs) ? mergedObs : null;
           await safeQuery(
             "INSERT INTO escala_lancamentos (data, oficial, codigo, observacao, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?) " +
               "ON DUPLICATE KEY UPDATE codigo=VALUES(codigo), observacao=VALUES(observacao), updated_by=VALUES(updated_by), updated_at=CURRENT_TIMESTAMP",
@@ -1644,11 +1674,11 @@ app.put("/api/assignments", authRequired(false), async (req, res) => {
 
       // log
       const changedCode = (beforeCode || "") !== (code || "");
-      const changedObs = needObs && (beforeObs || "") !== (newObs || "");
+      const changedObs = needObs && !!incomingObs && (beforeObs || "") !== (mergedObs || "");
       if (changedCode || changedObs) {
         const logBefore = beforeCode || "-";
         const logAfter = code || "-";
-        const logExtra = needObs ? ` | obs: ${(beforeObs || "-")} -> ${(newObs || "-")}` : "";
+        const logExtra = needObs ? ` | obs: ${(beforeObs || "-")} -> ${(mergedObs || "-")}` : "";
         await logAction(actor, target, "update_day", `${date}: ${logBefore} -> ${logAfter}${logExtra}`);
       
 // histórico detalhado
@@ -1662,7 +1692,7 @@ try {
   if (changedObs) {
     await safeQuery(
       "INSERT INTO escala_change_log (actor_name, target_name, data, field_name, before_value, after_value) VALUES (?, ?, ?, 'observacao', ?, ?)",
-      [actor, target, date, beforeObs || null, newObs || null]
+      [actor, target, date, beforeObs || null, mergedObs || null]
     );
   }
 } catch (_e) {
