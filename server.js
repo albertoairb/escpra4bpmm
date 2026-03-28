@@ -1837,7 +1837,7 @@ const lastStamp = fmtDDMMYYYYHHmm(lastAt);
 
     const drawPdfHeader = (yBase) => {
       doc.fontSize(9).font("Helvetica-Bold");
-      doc.text("PRAA", left, yBase, { width: colWName, align: "left" });
+      doc.text("PRAÇA", left, yBase, { width: colWName, align: "left" });
       for (let i = 0; i < dates.length; i++) {
         doc.text(fmtDDMMYYYY(dates[i]), left + colWName + i * colWDay, yBase, { width: colWDay, align: "center" });
       }
